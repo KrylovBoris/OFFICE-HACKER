@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d42435a250cde88468b5303b5015708f, type: 3}
+  m_Name: EmailCommutator
+  m_EditorClassIdentifier: 
+  friendlyInformalTexts: []
+  neutralInformalTexts: []
+  unfriendlyInformalTexts: []
+  friendlyFormalTexts: []
+  neutralFormalTexts: []
+  unfriendlyFormalTexts: []
+  friendlyInformalOpenings: []
+  neutralInformalOpenings: []
+  unfriendlyInformalOpenings: []
+  formalOpenings: []
+  friendlyInformalClosings: []
+  neutralInformalClosings: []
+  unfriendlyInformalClosings: []
+  formalClosings: []
+  greetingLetter: {fileID: 11400000, guid: 2e2c37f5fb4263245aafefc7b21960b2, type: 2}
+  storeEmail: {fileID: 11400000, guid: bec1ccd9301422e4e9955887c6ab6d2f, type: 2}
