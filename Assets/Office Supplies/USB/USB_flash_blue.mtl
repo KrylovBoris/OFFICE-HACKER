@@ -1,0 +1,8 @@
+newmtl USB-grey
+Kd 0.418 0.418 0.418
+d 1
+
+newmtl USB-blue
+Kd 0 0.06415292 0.574
+d 1
+
