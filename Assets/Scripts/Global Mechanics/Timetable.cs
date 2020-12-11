@@ -3,9 +3,9 @@ using UnityEngine;
 
 public enum EventType
 {
+    WorkTime,
     Break,
-    Lunch,
-    WorkTime
+    Lunch
 }
 
 [System.Serializable]
