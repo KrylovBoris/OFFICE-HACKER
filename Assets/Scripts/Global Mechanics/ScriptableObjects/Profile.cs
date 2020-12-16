@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Directory = FileSystemTree.Directory;
+using Directory = FileSystem.Directory;
 
 [CreateAssetMenu(fileName = "Profile", menuName = "ScriptableObjects/Profile", order = 3)]
 public class Profile : ScriptableObject
@@ -9,7 +9,7 @@ public class Profile : ScriptableObject
     public string password;
     public TextAsset workspaceConfig;
     
-    private FileSystemTree.Directory workSpace;
+    private Directory _workSpace;
     public void ChangePassword(string newPassword)
     {
         password = newPassword;
@@ -25,11 +25,11 @@ public class Profile : ScriptableObject
     {
         get
         {
-            if (workSpace == null)
+            if (_workSpace == null)
             {
-                workSpace = GameFileSystem.ConsturctDirectoriesFromJson(workspaceConfig);
+                _workSpace = GameFileSystem.ConsturctDirectoriesFromJson(workspaceConfig);
             }
-            return workSpace;
+            return _workSpace;
         }
     }
 

@@ -1,4 +1,4 @@
-using FileSystemTree;
+using FileSystem;
 using UnityEngine;
 
 namespace Global_Mechanics
@@ -15,7 +15,7 @@ namespace Global_Mechanics
         [SerializeField]
         [Multiline]
         private string _text;
-        private FileSystemTree.File _attachment;
+        private File _attachment;
 
         public string Sender => _sender;
         public string Receiver => _receiver;
@@ -25,7 +25,7 @@ namespace Global_Mechanics
         public string Text => _text;
         public File Attachment => _attachment;
 
-        public Email(string author, string receiver, string topic, string mainText, FileSystemTree.File attach)
+        public Email(string author, string receiver, string topic, string mainText, File attach)
         {
             _sender = author;
             _receiver = receiver;
