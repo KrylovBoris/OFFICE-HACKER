@@ -51,7 +51,7 @@ public class EmailCommutator : ScriptableObject
         }
         else
         {
-            UnityEngine.Debug.LogError("Invalid receiver address");
+            Debug.LogError("Invalid receiver address");
         }
     }
 
