@@ -12,11 +12,12 @@ namespace FileSystem
         [SerializeField] private string rootName = "root";
         [SerializeField] private string[] paths;
         [SerializeField] private int[] sizes;
-        private Directory _calatogue;
+
+        private Directory _catalogue;
 
         private Dictionary<string, Directory> _pathToDirectory = new Dictionary<string, Directory>();
 
-        public Directory Catalogue => _calatogue;
+        public Directory Catalogue => _catalogue ??= new Folder("", rootName);
 
         public void OnBeforeSerialize()
         {
@@ -27,13 +28,12 @@ namespace FileSystem
 
         public void OnAfterDeserialize()
         {
-            _calatogue = new Folder("", rootName);
             _pathToDirectory = new Dictionary<string, Directory>();
             for (var j = 0; j < paths.Length; j++)
             {
                 var dirs = paths[j].Split('\\');
                 var parentFolder = rootName;
-                _pathToDirectory.Add(parentFolder, _calatogue);
+                _pathToDirectory.Add(parentFolder, Catalogue);
                 foreach (var d in dirs)
                 {
                     if (!_pathToDirectory.ContainsKey(d))
