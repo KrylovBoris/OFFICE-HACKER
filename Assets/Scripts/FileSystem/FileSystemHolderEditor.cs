@@ -33,20 +33,31 @@ namespace FileSystem
             {
 
             }
-            rect = new Rect(0, rect.yMax, rect.width, rect.height * 5);
-            GUILayout.BeginArea(rect);
-            directoryDisplay.OnGUI(rect);
-            GUILayout.EndArea();
+            rect = new Rect(0, 22, 392, 500);
 
-            if (GUILayout.Button("Add Folder"))
+            using (new GUILayout.VerticalScope(GUILayout.ExpandHeight(true)))
             {
-                directoryDisplay.StartCreatingFolder();
-            }
-            if (GUILayout.Button("Add File"))
-            {
-                directoryDisplay.StartCreatingFolder();
-            }
+                GUILayout.BeginArea(rect);
+                GUILayout.BeginVertical();
+                directoryDisplay.OnGUI(new Rect(0, 0, rect.width, rect.height));
+                GUILayout.EndVertical();
+                GUILayout.EndArea();
 
+                GUILayout.BeginArea(new Rect(0, 595, rect.width, 20));
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("Add Folder"))
+                    {
+                        directoryDisplay.StartCreatingFolder();
+                    }
+
+                    if (GUILayout.Button("Add File"))
+                    {
+                        directoryDisplay.StartCreatingFolder();
+                    }
+                }
+                GUILayout.EndArea();
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -200,7 +211,6 @@ namespace FileSystem
                         if (!d.isBeingEdited)
                         {
                             base.RowGUI(args);
-                            return;
                         }
                         else
                         {
