@@ -8,6 +8,7 @@ TagManager:
   - PickUp
   - AINavMesh
   - MechanicTrigger
+  - Hint
   layers:
   - Default
   - TransparentFX
@@ -24,7 +25,7 @@ TagManager:
   - Interactable
   - AI
   - GameMechanics
-  - 
+  - Tutorial
   - 
   - 
   - 
