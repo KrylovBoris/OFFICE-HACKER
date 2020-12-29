@@ -1,330 +1,532 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Collections.Viewable;
+using JetBrains.Lifetimes;
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace FileSystem
 {
-    [CustomEditor(typeof(FileSystemHolder))]
-    public class FileSystemHolderEditor : Editor
+    public class FileSystemHolderEditor : EditorWindow
     {
-
-        private DirectoryTreeView directoryDisplay;
+        [SerializeField]
+        private HardDrive _holder;
+        private DirectoryTreeView _directoryDisplay;
         private TreeViewState _state;
 
         private Vector2 _scrollPos;
 
         public void OnEnable()
         {
-            if (_state == null)
-                _state = new TreeViewState();
-
-            directoryDisplay =
-                new DirectoryTreeView((Folder)((FileSystemHolder)serializedObject.targetObject).Catalogue, _state);
+            _state ??= new TreeViewState();
+            if (_holder != null)
+                Init();
         }
 
-        public override void OnInspectorGUI()
+        private void Init()
         {
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("rootName"));
-            var rect = GUILayoutUtility.GetLastRect();
-            using (var scope = new EditorGUILayout.ScrollViewScope(_scrollPos))
-            {
+            _directoryDisplay ??= new DirectoryTreeView(_holder, _state);
+        }
 
+        [MenuItem("Window/Edit file system")]
+        public static void OpenFileSystemEditor()
+        {
+            GetWindow<FileSystemHolderEditor>().Show();
+        }
+        
+        public void OnGUI()
+        {
+            _holder = (HardDrive) EditorGUILayout.ObjectField(_holder, typeof(HardDrive), false);
+
+            if (!_holder) return;
+            Init();
+            
+            var rect = new Rect(0, 0, this.position.width, this.position.height);
+
+            EditorGUILayout.BeginVertical();
+            using (var scope = new EditorGUILayout.ScrollViewScope(_scrollPos, true, true))
+            {
+                _scrollPos = scope.scrollPosition;
+                _directoryDisplay.OnGUI(new Rect(0, 0, rect.width - 20, rect.height));
             }
-            rect = new Rect(0, 22, 392, 500);
-
-            using (new GUILayout.VerticalScope(GUILayout.ExpandHeight(true)))
+            
+            using (new EditorGUILayout.HorizontalScope())
             {
-                GUILayout.BeginArea(rect);
-                GUILayout.BeginVertical();
-                directoryDisplay.OnGUI(new Rect(0, 0, rect.width, rect.height));
-                GUILayout.EndVertical();
-                GUILayout.EndArea();
-
-                GUILayout.BeginArea(new Rect(0, 595, rect.width, 20));
-                using (new EditorGUILayout.HorizontalScope())
+                if (GUILayout.Button("Add Folder"))
                 {
-                    if (GUILayout.Button("Add Folder"))
-                    {
-                        directoryDisplay.StartCreatingFolder();
-                    }
-
-                    if (GUILayout.Button("Add File"))
-                    {
-                        directoryDisplay.StartCreatingFolder();
-                    }
+                    _directoryDisplay.StartCreatingFolder(_holder);
                 }
-                GUILayout.EndArea();
-            }
 
-            serializedObject.ApplyModifiedProperties();
+                if (GUILayout.Button("Add File"))
+                {
+                    _directoryDisplay.StartCreatingFile(_holder);
+                }
+            }
+            EditorGUILayout.EndVertical();
+            if (GUILayout.Button("Apply changes"))
+            {
+                _holder.SerializeTree();
+                EditorUtility.SetDirty(_holder);
+                this.Close();
+            }
         }
 
         private class DirectoryTreeView : TreeView
         {
-            private int idGiver = -1;
-            private Folder _rootFolder;
+            private int _idGiver;
+            private HardDrive _drive;
+            private readonly Folder _rootFolder;
 
-            private Dictionary<int, DirectoryData> _myTreeData = new Dictionary<int, DirectoryData>();
+            private readonly Dictionary<int, Directory> _myTreeData = new Dictionary<int, Directory>();
 
-            private readonly Texture2D _folderIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_Folder Icon" : "Folder Icon").image;
-            private Texture2D _textFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_TextAsset Icon" : "TextAsset Icon").image;
-            private Texture2D _tableFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_UnityEditor.SceneView@2x" : "UnityEditor.SceneView@2x").image;
-            private Texture2D _pictureFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_Texture Icon" : "Texture Icon").image;
-            private Texture2D _musicFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_AudioImporter Icon" : "AudioImporter Icon").image;
-            private Texture2D _archiveFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_ModelImporter Icon" : "ModelImporter Icon").image;
-            private Texture2D _otherFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_Settings@2x" : "Settings@2x").image;
+            private static readonly Texture2D FolderIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_Folder Icon" : "Folder Icon").image;
+            private static readonly Texture2D TextFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_TextAsset Icon" : "TextAsset Icon").image;
+            private static readonly Texture2D TableFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_UnityEditor.SceneView@2x" : "UnityEditor.SceneView@2x").image;
+            private static readonly Texture2D PictureFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_Texture Icon" : "Texture Icon").image;
+            private static readonly Texture2D MusicFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_AudioImporter Icon" : "AudioImporter Icon").image;
+            private static readonly Texture2D ArchiveFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_ModelImporter Icon" : "ModelImporter Icon").image;
+            private static readonly Texture2D OtherFileIcon = (Texture2D)EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_Settings@2x" : "Settings@2x").image;
 
-            private Directory editDirectory;
-            private string editName;
-            private int chosenEditExtension;
-            private string editExtension;
-            private int editSize;
+            private IEnumerable<Directory> _buffer = Enumerable.Empty<Directory>();
 
-            private int _creationNode;
-            private Folder _createDirectoryAt;
-            private bool _isCreatingFile;
-
-            private GUIContent[] _extensions = new[]
+            public DirectoryTreeView(HardDrive drive, TreeViewState state) : base(state)
             {
-                new GUIContent(".txt"),
-                new GUIContent(".doc"),
-                new GUIContent(".html"),
-                new GUIContent(".htm"),
-                new GUIContent(".xml"),
-                new GUIContent(".json"),
-                new GUIContent(".bytes"),
-                new GUIContent(".yaml"),
-                new GUIContent(".json"),
-                new GUIContent(".fnt"),
-                new GUIContent(".xls"),
-                new GUIContent(".csv"),
-                new GUIContent(".dif"),
-                new GUIContent(".dbf"),
-                new GUIContent(".ods"),
-                new GUIContent(".bmp"),
-                new GUIContent(".psd"),
-                new GUIContent(".jpg"),
-                new GUIContent(".gif"),
-                new GUIContent(".jpeg"),
-                new GUIContent(".tiff"),
-                new GUIContent(".png"),
-                new GUIContent(".mp3"),
-                new GUIContent(".wav"),
-                new GUIContent(".flac"),
-                new GUIContent(".wma"),
-                new GUIContent(".aiff"),
-                new GUIContent(".7z"),
-                new GUIContent(".zip"),
-                new GUIContent(".rar"),
-                new GUIContent(".iso"),
-                new GUIContent(".tar"),
-                new GUIContent(".jar")
-            };
-            
-            public DirectoryTreeView(Folder root, TreeViewState state) : base(state)
-            {
-                _rootFolder = root;
+                _drive = drive;
+                _rootFolder = (Folder) drive.Catalogue;
+                useScrollView = false;
                 Reload();
             }
 
             protected override TreeViewItem BuildRoot()
             {
-                var root = new TreeViewItem(idGiver++, -1);
+                _idGiver = -1;
+                _myTreeData.Clear();
+                var root = new TreeViewItem(_idGiver++, -1);
                 root.AddChild(BuildFolder(_rootFolder));
                 return root;
             }
 
             private TreeViewItem BuildFolder(Folder directory)
             {
-                var result = new TreeViewItem(idGiver++, directory.Path.Split('\\').Length, directory.Name);
-                _myTreeData.Add(result.id, new DirectoryData(directory));
-                result.icon = _folderIcon;
+                var result = new TreeViewItem(_idGiver++, directory.Path.Split('\\').Length - 1, directory.Name);
+                _myTreeData.Add(result.id, directory);
+                result.icon = FolderIcon;
                 foreach (var dir in directory.SubDirectories)
                 {
                     if (dir is Folder folder)
                     {
                         var newFolder = BuildFolder(folder);
                         result.AddChild(newFolder);
-                        _myTreeData.Add(newFolder.id, new DirectoryData(folder));
                     }
                     else
                     {
                         if (dir is File file)
                         {
-                            var newFileItem = new TreeViewItem(idGiver++, file.Path.Split('\\').Length, file.Name);
+                            var newFileItem = new TreeViewItem(_idGiver++, file.Path.Split('\\').Length - 1, file.Name)
+                            {
+                                icon = FromExtensionToIcon(file.Extension)
+                            };
                             result.AddChild(newFileItem);
-                            
+                            _myTreeData.Add(newFileItem.id, file);
                         }
                     }
                 }
 
-                if (directory == _createDirectoryAt)
-                {
-                    _creationNode = idGiver++;
-                    result.AddChild(new TreeViewItem(_creationNode));
-                }
-                    
                 return result;
+            }
+            
+            private static Texture2D FromExtensionToIcon(string extension)
+            {
+                switch (extension)
+                {
+                    case ".txt":
+                    case ".doc":
+                    case ".odf":
+                    case ".html":
+                    case ".htm":
+                    case ".xml":
+                    case ".json":
+                    case ".bytes":
+                    case ".yaml":
+                    case ".fnt":
+                        return TextFileIcon;
+                    case ".xls":
+                    case ".csv":
+                    case ".dif":
+                    case ".dbf":
+                    case ".ods":
+                        return TableFileIcon;
+                    case ".bmp":
+                    case ".psd":
+                    case ".jpg":
+                    case ".gif":
+                    case ".jpeg":
+                    case ".tiff":
+                    case ".png":
+                        return PictureFileIcon;
+                    case ".mp3":
+                    case ".wav":
+                    case ".flac":
+                    case ".wma":
+                    case ".aiff":
+                        return MusicFileIcon;
+                    case ".7z":
+                    case ".zip":
+                    case ".rar":
+                    case ".iso":
+                    case ".tar":
+                    case ".jar":
+                        return ArchiveFileIcon;
+                    default:
+                        return OtherFileIcon;
+                }
             }
 
             protected override void RowGUI(RowGUIArgs args)
             {
-                var item = (TreeViewItem)args.item;
-                var data = _myTreeData[item.id];
+                var item = args.item;
                 Rect rect = args.rowRect;
                 rect.x += GetContentIndent(item);
                 
-                if (_creationNode == item.id)
-                {
-                    if (_isCreatingFile)
-                    {
-                        editName = EditorGUI.TextField(rect, "Name");
-                        editExtension = _extensions[EditorGUI.Popup(rect, chosenEditExtension, _extensions)].text;
-                        editSize = EditorGUI.IntField(rect, editSize);
-                    }
-                    else
-                    {
-                        editName = EditorGUI.TextField(rect, "Name");
-                    }
-                }
-                
                 if (_myTreeData.ContainsKey(item.id))
                 {
-                    var d = _myTreeData[item.id];
-                    if (d.isFolder)
+                    base.RowGUI(args);
+                }
+            }
+            
+            protected override void ContextClickedItem(int id)
+            {
+                var menu = new GenericMenu();
+                menu.AddItem(new GUIContent("Edit Node"), false, () => StartEditingNode(_drive, _myTreeData[id]));
+                menu.AddItem(new GUIContent("Create File"), false, () => StartCreatingFile(_drive));
+                menu.AddItem(new GUIContent("Create Folder"), false, () => StartCreatingFolder(_drive));
+                menu.AddSeparator("");
+                menu.AddItem(new GUIContent("Copy"), false, () => StoreCopy(ChosenDirectories()));
+                menu.AddItem(new GUIContent("Cut"), false, () => MarkForCut(ChosenDirectories()));
+                if (_buffer.Any() && CanPaste())
+                {
+                    menu.AddItem(new GUIContent("Paste"), false, () => Paste((Folder)_myTreeData[id]));
+                }
+                else
+                {
+                    menu.AddDisabledItem(new GUIContent("Paste"));
+                }
+                menu.AddSeparator("");
+                menu.AddItem(new GUIContent("Delete"), false, () => Delete(_myTreeData[id]));
+                menu.ShowAsContext();
+            }
+
+            private bool CanPaste()
+            {
+                var location = _myTreeData[GetSelection().Last()];
+                return !location.IsMarked && !(location is File);
+            }
+
+            private void Delete(Directory directory)
+            {
+                _drive.RemoveDirectory(directory);
+                Reload();
+            }
+
+            private IEnumerable<Directory> ChosenDirectories()
+            {
+                var selected = GetSelection().Select(i => _myTreeData[i]).ToList();
+                selected.Sort((directory, directory1) =>
+                {
+                    if (directory.Path.Contains(directory1.Path)) return 1;
+                    if (directory1.Path.Contains(directory.Path)) return -1;
+                    return 0;
+                });
+
+                var result = new List<Directory>();
+                
+                foreach (var dir in selected.Where(dir => !result.Exists(d => dir.Path.Contains(d.Path + '\\'))))
+                {
+                    result.Add(dir);
+                }
+
+                return result;
+            }
+
+            public void Paste(Folder dir)
+            {
+                foreach (var entry in _buffer)
+                {
+                    Directory copiedDirectory;
+                    switch (entry)
                     {
-                        if (!d.isBeingEdited)
+                        case Folder f:
+                            copiedDirectory = f;
+                            if (dir.SubDirectories.Exists(d => d.Name == f.Name))
+                            {
+                                ((Folder) copiedDirectory).Rename(dir, copiedDirectory.Name);
+                            }
+                            copiedDirectory.ReassignPath(dir.Path);
+                            dir.SubDirectories.Add(copiedDirectory);
+                            break;
+                        case File f:
+                            copiedDirectory = f;
+                            if (dir.SubDirectories.Exists(d => d.Name == f.Name))
+                            {
+                                ((File) copiedDirectory).Rename(dir, copiedDirectory.Name);
+                            }
+                            copiedDirectory.ReassignPath(dir.Path);
+                            dir.SubDirectories.Add(copiedDirectory);
+                            break;
+                    }
+                    _drive.RemoveMarked();
+                    _drive.FixDictionary();
+                }
+                Reload();
+            }
+
+            private void MarkForCut(IEnumerable<Directory> directory)
+            {
+                StoreCopy(directory);
+                foreach (var dir in directory)
+                {
+                    dir.Mark();
+                }
+            }
+
+            private void UnmarkAll()
+            {
+                _rootFolder.Unmark();
+            }
+
+            private void StoreCopy(IEnumerable<Directory> directory)
+            {
+                UnmarkAll();
+                var res = new List<Directory>();
+                foreach (var dir in directory)
+                {
+                    switch (dir)
+                    {
+                        case Folder f:
+                            var copiedFolder = new Folder(f);
+                            copiedFolder.ReassignPath("");
+                            res.Add(copiedFolder);
+                            break;
+                        case File f:
+                            var copiedFile = new File(f);
+                            copiedFile.ReassignPath("");
+                            res.Add(copiedFile);
+                            break;
+                    }
+                }
+
+                _buffer = res;
+            }
+
+            private void StartEditingNode(HardDrive holder, Directory dir)
+            {
+                var item = dir;
+                var signal = NodeEditor.EditNode(holder, dir);
+                signal.AdviseOnce(Lifetime.Eternal, (b =>
+                {
+                    if (b) Reload();
+                }));
+            }
+
+            public void StartCreatingFolder(HardDrive holder)
+            {
+                var selection = GetSelection();
+                if (!selection.Any()) return;
+                var item = _myTreeData[selection.Last()];
+                if (item is Folder folder)
+                {
+                    var signal = NodeEditor.CreateNode(holder, folder, true);
+                    signal.AdviseOnce(Lifetime.Eternal, (b =>
+                    {
+                        if (b) Reload();
+                    }));
+                }
+            }
+            public void StartCreatingFile(HardDrive holder)
+            {
+                var selection = GetSelection();
+                var item = _myTreeData[selection.Last()];
+                if (item is Folder folder)
+                {
+                    var signal = NodeEditor.CreateNode(holder, folder, false);
+                    signal.AdviseOnce(Lifetime.Eternal, (b =>
+                    {
+                        if (b) Reload();
+                    }));
+                }
+
+            }
+        }
+        
+        public class NodeEditor : EditorWindow
+        {
+            private HardDrive _holder;
+            private Directory _directory;
+            private string _name;
+            private int _size;
+            private string _extension;
+            private bool _isEditing;
+            private bool _isCreatingFolder;
+
+            private Signal<bool> _finishedEditing;
+
+            private static readonly Lazy<Texture> TextFileIcon = new Lazy<Texture>(() => EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_TextAsset Icon" : "TextAsset Icon").image);
+            private static readonly Lazy<Texture> TableFileIcon = new Lazy<Texture>(() => EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_UnityEditor.SceneView@2x" : "UnityEditor.SceneView@2x").image);
+            private static readonly Lazy<Texture> PictureFileIcon = new Lazy<Texture>(() => EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_Texture Icon" : "Texture Icon").image);
+            private static readonly Lazy<Texture> MusicFileIcon = new Lazy<Texture>(() => EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_AudioImporter Icon" : "AudioImporter Icon").image);
+            private static readonly Lazy<Texture> ArchiveFileIcon = new Lazy<Texture>(() => EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ? "d_ModelImporter Icon" : "ModelImporter Icon").image);
+            
+            private int _extensionIndex;
+            private readonly Lazy<GUIContent[]> _extensions = new Lazy<GUIContent[]>( ()=> new []
+            {
+                new GUIContent(".txt", TextFileIcon.Value),
+                new GUIContent(".doc", TextFileIcon.Value),
+                new GUIContent(".html", TextFileIcon.Value),
+                new GUIContent(".htm", TextFileIcon.Value),
+                new GUIContent(".xml", TextFileIcon.Value),
+                new GUIContent(".json", TextFileIcon.Value),
+                new GUIContent(".bytes", TextFileIcon.Value),
+                new GUIContent(".yaml", TextFileIcon.Value),
+                new GUIContent(".json", TextFileIcon.Value),
+                new GUIContent(".fnt", TextFileIcon.Value),
+                new GUIContent(".xls", TableFileIcon.Value),
+                new GUIContent(".csv", TableFileIcon.Value),
+                new GUIContent(".dif", TableFileIcon.Value),
+                new GUIContent(".dbf", TableFileIcon.Value),
+                new GUIContent(".ods", TableFileIcon.Value),
+                new GUIContent(".bmp", PictureFileIcon.Value),
+                new GUIContent(".psd", PictureFileIcon.Value),
+                new GUIContent(".jpg", PictureFileIcon.Value),
+                new GUIContent(".gif", PictureFileIcon.Value),
+                new GUIContent(".jpeg", PictureFileIcon.Value),
+                new GUIContent(".tiff", PictureFileIcon.Value),
+                new GUIContent(".png", PictureFileIcon.Value),
+                new GUIContent(".mp3", MusicFileIcon.Value),
+                new GUIContent(".wav", MusicFileIcon.Value),
+                new GUIContent(".flac", MusicFileIcon.Value),
+                new GUIContent(".wma", MusicFileIcon.Value),
+                new GUIContent(".aiff", MusicFileIcon.Value),
+                new GUIContent(".7z", ArchiveFileIcon.Value),
+                new GUIContent(".zip", ArchiveFileIcon.Value),
+                new GUIContent(".rar", ArchiveFileIcon.Value),
+                new GUIContent(".iso", ArchiveFileIcon.Value),
+                new GUIContent(".tar", ArchiveFileIcon.Value),
+                new GUIContent(".jar", ArchiveFileIcon.Value)
+            });
+
+            public void OnDisable()
+            {
+                Debug.Log("Close");
+            }
+            
+            public static Signal<bool> CreateNode(HardDrive holder, Folder parent, bool isCreatingFolder)
+            {
+                var editor = EditorWindow.GetWindow<NodeEditor>();
+                editor._holder = holder;
+                editor._directory = parent;
+                editor._isEditing = false;
+                editor._isCreatingFolder = isCreatingFolder;
+                editor.ShowPopup();
+                editor._finishedEditing = new Signal<bool>();
+                return editor._finishedEditing;
+            }
+
+            public static Signal<bool> EditNode(HardDrive holder, Directory entryToEdit)
+            {
+                var editor = EditorWindow.GetWindow<NodeEditor>();
+                editor._holder = holder;
+                editor._isEditing = true;
+                editor._name = entryToEdit.Name.Split('.').First();
+                editor._directory = entryToEdit;
+                if (entryToEdit is File fileEntry)
+                {
+                    editor._size = fileEntry.Size;
+                    editor._extension = fileEntry.Extension;
+                }
+                editor.ShowPopup();
+                editor._finishedEditing = new Signal<bool>();
+                return editor._finishedEditing;
+            }
+            public void Apply() 
+            {
+                if (_isEditing)
+                {
+                        if (_directory is Folder folder)
                         {
-                            base.RowGUI(args);
-                            return;
+                            _holder.Rename(folder, _name);
                         }
-                        else
+
+                        if (_directory is File file)
                         {
-                            editName = EditorGUI.TextField(rect, "Name");
+                            _holder.Rename(file, _name + _extension);
+                            file.ChangeSize(_size);
                         }
+                }
+                else
+                {
+                    if (_isCreatingFolder)
+                    {
+                        _holder.AddFolder((Folder) _directory, _name);
                     }
                     else
                     {
-                        if (!d.isBeingEdited)
-                        {
-                            base.RowGUI(args);
-                        }
-                        else
-                        {
-                            editName = EditorGUI.TextField(rect, "Name");
-                            editExtension = _extensions[EditorGUI.Popup(rect, chosenEditExtension, _extensions)].text;
-                            editSize = EditorGUI.IntField(rect, editSize);
-                        }
+                        _holder.AddFile((Folder) _directory, _name, _extension, _size);
                     }
                 }
+                _finishedEditing.Fire(true);
+                this.Close();
             }
-            
-            private class DirectoryData
-            {
-                public Directory directory;
-                public bool isBeingEdited;
-                public bool isFolder;
-                public string extension;
-                public int size;
 
-                public DirectoryData(Directory directory)
+            public void Cancel()
+            {
+                _finishedEditing.Fire(false);
+                this.Close();
+            }
+
+            public void OnGUI()
+            {
+                _name = EditorGUILayout.TextField(_name);
+                if (_isEditing)
                 {
-                    this.directory = directory;
-                    this.isBeingEdited = false;
-                    this.isFolder = directory is Folder;
-                    if (directory is File file)
+                    switch (_directory)
                     {
-                        this.extension = file.Name.Split('.').Last();
-                        this.size = file.Size;
+                        case File _:
+                            _extensionIndex = EditorGUILayout.Popup(new GUIContent("File extension"), _extensionIndex, _extensions.Value);
+                            _extension = _extensions.Value[_extensionIndex].text;
+                            _size = EditorGUILayout.IntField("File size", _size);
+                            break;
+                        case Folder _:
+                            
+                            break;
                     }
-
-                }
-            }
-
-            public void ApplyEdit(int id)
-            {
-                if (!_myTreeData[id].isBeingEdited) return;
-                if (editDirectory is File file)
-                {
-                    file.Rename(editName + editExtension);
-                    file.ChangeSize(editSize);
                 }
                 else
                 {
-                    if (editDirectory is Folder folder)
+                    if (!_isCreatingFolder)
                     {
-                        folder.Rename(editName);
+                        _extensionIndex = EditorGUILayout.Popup(new GUIContent("File extension"), _extensionIndex, _extensions.Value);
+                        _extension = _extensions.Value[_extensionIndex].text;
+                        _size = EditorGUILayout.IntField("File size", _size);
                     }
                 }
-                
-                _myTreeData[id].isBeingEdited = false;
-                Reload();
-            }
 
-            public void ApplyDirectoryCreation()
-            {
-                if (_createDirectoryAt == null) return;
-                if (_isCreatingFile)
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Cancel"))
                 {
-                    _createDirectoryAt.AddFile(editName, editExtension, editSize);
+                    Cancel();
                 }
-                else
+                if (GUILayout.Button("Apply"))
                 {
-                    _createDirectoryAt.AddFolder(editName);
+                    Apply();
                 }
-
-                _createDirectoryAt = null;
-                Reload();
-            }
-
-            protected override void SelectionChanged(IList<int> selectedIds)
-            {
-                ApplyDirectoryCreation();
-                foreach (var k in _myTreeData.Keys)
-                {
-                    ApplyEdit(k);
-                }
-                
-                base.SelectionChanged(selectedIds);
-            }
-
-            protected override void ContextClickedItem(int id)
-            {
-                _myTreeData[id].isBeingEdited = true;
-            }
-
-            public void StartCreatingFolder()
-            {
-                var selection = GetSelection();
-                foreach (var item in selection)
-                {
-                    if (_myTreeData[item].directory is Folder)
-                    {
-                        _creationNode = item;
-                        _createDirectoryAt = (Folder)_myTreeData[item].directory;
-                        _isCreatingFile = false;
-                    }
-                }
-                Reload();
-            }
-            
-            public void StartCreatingFile()
-            {
-                var selection = GetSelection();
-                foreach (var item in selection)
-                {
-                    if (_myTreeData[item].directory is Folder)
-                    {
-                        _creationNode = item;
-                        _createDirectoryAt = (Folder)_myTreeData[item].directory;
-                        _isCreatingFile = true;
-                    }
-                }
-                Reload();
+                EditorGUILayout.EndHorizontal();
             }
         }
+
+
     }
 }
