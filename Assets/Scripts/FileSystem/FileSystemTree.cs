@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using UnityEngine;
 
 namespace FileSystem
 {
@@ -72,10 +73,11 @@ namespace FileSystem
         private int _size;
         public int Size => _size;
         public override DirectoryType Type => FromExtensionToFileType(_extension);
+        public string Extension => _extension;
 
         //public string Name => _path.Substring(_path.LastIndexOf('\\'));
 
-        private static DirectoryType FromExtensionToFileType(string extension)
+        public static DirectoryType FromExtensionToFileType(string extension)
         {
             switch (extension)
             {
@@ -124,7 +126,7 @@ namespace FileSystem
             }
         }
         
-        public File(string parentDirectoryPath, string name, string extension, int size):base(parentDirectoryPath, name)
+        public File(string parentDirectoryPath, string name, string extension, int size) : base(parentDirectoryPath, name)
         {
             _extension = extension;
             _path += _extension;
@@ -138,12 +140,28 @@ namespace FileSystem
             _size = file._size;
         }
 
-        public void Rename(string newName)
+        public void Rename(Folder parent, string newName)
         {
-            string newExtension = newName.Substring(newName.IndexOf('.'));
             string fileName = newName.Substring(0, newName.IndexOf('.'));
+            string newExtension = newName.Substring(newName.IndexOf('.'));
+            if (parent.SubDirectories.Exists(d => d.Name == newName))
+            {
+                int copyCount = 1;
+                while (parent.SubDirectories.Exists(d => d.Name == fileName + " (" + copyCount + ")" + newExtension))
+                {
+                    copyCount++;
+                }
+
+                fileName = fileName + " (" + copyCount + ")";
+            }
+            
             _extension = newExtension;
-            _path = _path.Substring(0, _path.LastIndexOf('\\')) + fileName + _extension;
+            if (_path.Contains('\\'))
+                _path = _path.Substring(0, _path.LastIndexOf('\\') + 1) + fileName + _extension;
+            else
+            {
+                _path = fileName + _extension;
+            }
         }
 
         public void ChangeSize(int editSize)
@@ -180,11 +198,21 @@ namespace FileSystem
             }
         }
 
-        public void Rename(string newName)
+        public void Rename(Folder parent, string newName)
         {
             if (_path.Contains('\\'))
             {
-                string parentPath = Path.Substring(0, Path.LastIndexOf('\\'));
+                string parentPath = parent.Path;
+                if (parent.SubDirectories.Exists(d => d.Name == newName))
+                {
+                    int copyCount = 1;
+                    while (parent.SubDirectories.Exists(d => d.Name == newName + " (" + copyCount + ")"))
+                    {
+                        copyCount++;
+                    }
+
+                    newName += " (" + copyCount + ")";
+                }
                 _path = parentPath + '\\' + newName;
             }
             else
@@ -228,6 +256,19 @@ namespace FileSystem
 
         public Folder AddFolder(string name)
         {
+            if (this.SubDirectories.Exists(d => d.Name == name))
+            {
+                int copyCount = 0;
+                foreach (var subDir in this.SubDirectories)
+                {
+                    if (subDir.Name.Contains(name) || (subDir.Name.Contains(name + " (")))
+                    {
+                        copyCount++;
+                    }
+                }
+                name = name + " (" + copyCount + ")";
+            }
+            
             var dir = new Folder(this.Path, name);
             _subDirectories.Add(dir);
             return dir;
@@ -235,6 +276,19 @@ namespace FileSystem
 
         public File AddFile(string name, string extension, int fileSize)
         {
+            if (this.SubDirectories.Exists(d => d.Name == name))
+            {
+                int copyCount = 0;
+                foreach (var subDir in this.SubDirectories)
+                {
+                    if (subDir.Name.Contains(name) || (subDir.Name.Contains(name + " (")))
+                    {
+                        copyCount++;
+                    }
+                }
+                name = name + " (" + copyCount + ")";
+            }
+            
             var dir = new File(this.Path, name, extension, fileSize);
             _subDirectories.Add(dir);
             return dir;
