@@ -5,7 +5,7 @@ using HierarchicalTaskNetwork;
 
 namespace Agent
 {
-    public class BaseAgent : MonoBehaviour
+    public partial class BaseAgent : MonoBehaviour
     {
         private uint _id;
         private static uint _agentsCount;
