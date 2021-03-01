@@ -14,6 +14,7 @@ public class GameFileSystem : MonoBehaviour, ISmartphoneService, IPointerClickHa
     public GameObject entryGameObject;
     public GameObject toolPanel;
     public TextAsset[] jFileSystemAsset;
+    public HardDrive[] fileSystems;
     public TextMeshProUGUI currentDirectoryTmp;
     
     [Header("Appearance")]
@@ -28,7 +29,7 @@ public class GameFileSystem : MonoBehaviour, ISmartphoneService, IPointerClickHa
     private Dictionary<DirectoryType, Sprite> _directoryTypeIcon;
     private Folder _fileSystemHolder;
     private JObject _jFileSystem;
-
+    
     private Dictionary<string, Directory> _pathToDirectory;
     private Dictionary<string, Directory> _rootFolders;
     private Directory _currentDirectory;
@@ -58,8 +59,6 @@ public class GameFileSystem : MonoBehaviour, ISmartphoneService, IPointerClickHa
         ConstructFileListTree();
         _currentDirectory = _fileSystemHolder;
     }
-
-    
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Right)
@@ -223,22 +222,20 @@ public class GameFileSystem : MonoBehaviour, ISmartphoneService, IPointerClickHa
                 
                 if (_pathToDirectory.ContainsKey(dir.Path + '\\' + copiedDirectory.Path))
                 {
-                    int copyCount = 0;
-                    foreach (var subDir in dir.SubDirectories)
-                    {
-                        if (subDir.Name.Contains(copiedDirectory.Name) || (subDir.Name.Contains(copiedDirectory.Name + " (")))
-                        {
-                            copyCount++;
-                        }
-                    }
-                    ((Folder) copiedDirectory).Rename(copiedDirectory.Name + " (" + copyCount + ")");
+                    ((Folder) copiedDirectory).Rename(dir, copiedDirectory.Name);
                 }
                 copiedDirectory.ReassignPath(dir.Path);
                 dir.SubDirectories.Add(copiedDirectory);
                 AddDirectoryToDictionary(copiedDirectory);
                 break;
             case File f:
+                
                 copiedDirectory = new File(f);
+                if (_pathToDirectory.ContainsKey(dir.Path + '\\' + copiedDirectory.Path))
+                {
+                    ((File) copiedDirectory).Rename(dir, copiedDirectory.Name);
+                }
+                
                 copiedDirectory.ReassignPath(dir.Path);
                 dir.SubDirectories.Add(copiedDirectory);
                 AddDirectoryToDictionary(copiedDirectory);
@@ -325,6 +322,14 @@ public class GameFileSystem : MonoBehaviour, ISmartphoneService, IPointerClickHa
             AddRootDirectory(newRootFolder);
             InstantiateDirectoryEntryButton(newRootFolder);
         }
+
+        foreach (var fileSystem in fileSystems)
+        {
+            var rootFolder = new Folder((Folder)fileSystem.Catalogue); 
+            AddDirectoryToDictionary(rootFolder);
+            AddRootDirectory(rootFolder);
+            InstantiateDirectoryEntryButton(rootFolder);
+        }
         
     }
 
@@ -333,20 +338,20 @@ public class GameFileSystem : MonoBehaviour, ISmartphoneService, IPointerClickHa
     #region DirectoryOperations
 
         public void GetToParentDirectory()
-    {
-        if (!IsShowingRoot)
         {
-            string parentPath = _currentDirectory.Path.Substring(0, _currentDirectory.Path.LastIndexOf('\\'));
-            _currentDirectory = _pathToDirectory[parentPath];
-            OpenDirectory(parentPath);
+            if (!IsShowingRoot)
+            {
+                string parentPath = _currentDirectory.Path.Substring(0, _currentDirectory.Path.LastIndexOf('\\'));
+                _currentDirectory = _pathToDirectory[parentPath];
+                OpenDirectory(parentPath);
+            }
+            else
+            {
+                _currentDirectory = _fileSystemHolder;
+                OpenDirectory(_fileSystemHolder);
+                currentDirectoryTmp.text = "Проводник";
+            }
         }
-        else
-        {
-            _currentDirectory = _fileSystemHolder;
-            OpenDirectory(_fileSystemHolder);
-            currentDirectoryTmp.text = "Проводник";
-        }
-    }
 
     
 
@@ -420,8 +425,8 @@ public class GameFileSystem : MonoBehaviour, ISmartphoneService, IPointerClickHa
         }
         public void AddCatalogue(Directory dir)
         {
-           AddRootDirectory(dir);
-           AddDirectoryToDictionary(dir);
+            AddRootDirectory(dir);
+            AddDirectoryToDictionary(dir);
         }
         
         public void AddCatalogueToDirectory(Directory dir, string path)
@@ -442,6 +447,6 @@ public class GameFileSystem : MonoBehaviour, ISmartphoneService, IPointerClickHa
             _rootFolders.Remove(path);
         }
 
-    #endregion
+        #endregion
 }
 
