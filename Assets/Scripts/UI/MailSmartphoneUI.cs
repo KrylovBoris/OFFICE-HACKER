@@ -96,9 +96,8 @@ public class MailSmartphoneUI : MonoBehaviour, ISmartphoneService, IMail, INotif
             {
                 InstantiateEmailButton(ins[i]);
             }
-    
-    
-                StartCoroutine(MarkAllLettersAsSeen());
+            
+            StartCoroutine(MarkAllLettersAsSeen());
         }
         else
         {

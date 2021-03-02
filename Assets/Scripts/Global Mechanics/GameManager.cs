@@ -60,7 +60,7 @@ public class GameManager : MonoBehaviour
     
     private CameraScript _cameraScript;
     public bool IsPaused { get; private set; }
-    public bool IsLookingAtSmartPhone { get; private set; }
+    public bool IsLookingAtSmartPhone => currentGameMod == GameMode.Computer;
     
     [SerializeField]
     
@@ -96,7 +96,6 @@ public class GameManager : MonoBehaviour
     {
         commutator.SendLetter(commutator.greetingLetter);
         commutator.SendLetter(commutator.storeEmail);
-
     }
 
     private void Update()
@@ -172,7 +171,6 @@ public class GameManager : MonoBehaviour
             currentGameMod = GameMode.Smartphone;
             uiController.ShowSmartphone();
             _cameraScript.UnlockCursor();
-            IsLookingAtSmartPhone = true;
         }
     }
 
@@ -182,7 +180,6 @@ public class GameManager : MonoBehaviour
         currentGameMod = GameMode.FPGameplay;
         uiController.HideSmartphone();
         _cameraScript.LockCursor();
-        IsLookingAtSmartPhone = false;
     }
 
     public void OpenNote(string text)

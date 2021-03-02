@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using FileSystem;
+using UnityEngine;
 using Directory = FileSystem.Directory;
 
 [CreateAssetMenu(fileName = "Profile", menuName = "ScriptableObjects/Profile", order = 3)]
@@ -7,7 +8,7 @@ public class Profile : ScriptableObject
     public string personName;
     public string logInID;
     public string password;
-    public TextAsset workspaceConfig;
+    public HardDrive workspaceConfig;
     
     private Directory _workSpace;
     public void ChangePassword(string newPassword)
@@ -27,7 +28,7 @@ public class Profile : ScriptableObject
         {
             if (_workSpace == null)
             {
-                _workSpace = GameFileSystem.ConsturctDirectoriesFromJson(workspaceConfig);
+                _workSpace = workspaceConfig.Catalogue;
             }
             return _workSpace;
         }
