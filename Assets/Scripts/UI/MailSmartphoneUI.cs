@@ -153,9 +153,8 @@ public class MailSmartphoneUI : MonoBehaviour, ISmartphoneService, IMail, INotif
     {
         if (_mailbox == null)
         {
-            _mailbox = new EmailBox(emailAddress);
             GameManager.gm.SetPlayerEmail(emailAddress);
-            GameManager.gm.Commutator.EstablishConnection(_mailbox);
+            GameManager.gm.Commutator.EstablishConnection(emailAddress, out _mailbox);
             GameManager.gm.SendGreetingLetters();
         }
         this.gameObject.SetActive(true);

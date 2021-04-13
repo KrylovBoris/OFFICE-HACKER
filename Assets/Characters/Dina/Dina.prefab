@@ -1405,7 +1405,6 @@ GameObject:
   - component: {fileID: 8825137626001726709}
   - component: {fileID: 1187227735089562850}
   - component: {fileID: 771296808574841867}
-  - component: {fileID: 2789671172500480733}
   m_Layer: 0
   m_Name: Dina
   m_TagString: Untagged
@@ -1489,6 +1488,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   workingPlace: {fileID: 0}
   department: {fileID: 0}
+  standardStoppingDistance: 0.05
+  minWaitTime: 0
+  maxWaitTime: 0
 --- !u!114 &8825137626001726709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1534,44 +1536,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e74db8a078863914983a4b1a0d2379e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &2789671172500480733
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5174745001808359537}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb4fa562d67034868a9aafbe4b663012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rootNode: {fileID: 0}
-  segments:
-  - firstTransform: {fileID: 6155013442387944603}
-    lastTransform: {fileID: 6360997305641493385}
-    thresholdAngleDifference: 30
-    bendingMultiplier: 0.6
-    maxAngleDifference: 90
-    maxBendingAngle: 40
-    responsiveness: 2.5
-  - firstTransform: {fileID: 8502628690894265258}
-    lastTransform: {fileID: 5869770960900899984}
-    thresholdAngleDifference: 0
-    bendingMultiplier: 0.7
-    maxAngleDifference: 30
-    maxBendingAngle: 80
-    responsiveness: 4
-  nonAffectedJoints:
-  - joint: {fileID: 7421894125663462513}
-    effect: 0.3
-  - joint: {fileID: 5152559341517730614}
-    effect: 0.3
-  headLookVector: {x: 0, y: 0, z: 1}
-  headUpVector: {x: 0, y: 1, z: 0}
-  target: {fileID: 0}
-  effect: 1
-  overrideAnimation: 1
 --- !u!1 &5179847493020123589
 GameObject:
   m_ObjectHideFlags: 0

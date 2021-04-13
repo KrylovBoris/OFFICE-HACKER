@@ -1,73 +1,60 @@
 using System.Collections;
+using System.Threading.Tasks;
 
 namespace HierarchicalTaskNetwork
 {
-    public class SimpleTask : Task
+    public class SimpleTask : HtnTask
     {
         public delegate void TaskAction();
 
-        readonly TaskAction taskAction;
-        readonly protected Condition[] endingConditions;
+        private readonly TaskAction _taskAction;
+        private readonly Condition[] _endingConditions;
 
-        public override TaskType Type
-        {
-            get { return TaskType.Simple; }
-        }
+        public override TaskType Type => TaskType.Simple;
 
         public SimpleTask(string name,
-            CoroutineStarter coroutineRunner,
             TaskAction action = null,
             Condition[] conditions = null,
             Condition[] rules = null,
-            Condition[] finish = null) : base(name, coroutineRunner, conditions, rules)
+            Condition[] finish = null) : base(name, conditions, rules)
         {
-            taskAction = action;
+            _taskAction = action;
             if (finish == null)
             {
-                endingConditions = EmptyCondition;
+                _endingConditions = EmptyCondition;
             }
             else
             {
-                endingConditions = new Condition[finish.Length];
-                finish.CopyTo(endingConditions, 0);
+                _endingConditions = new Condition[finish.Length];
+                finish.CopyTo(_endingConditions, 0);
             }
 
         }
 
         private bool CheckEndTask()
         {
-            return BasicCheck(endingConditions);
+            return BasicCheck(_endingConditions);
         }
 
-        protected override IEnumerator Execution()
+        internal override async Task<TaskStatus> Execution()
         {
-            SetStatus(TaskStatus.InProgress);
-            //Debug.Log("Starting task " + Name);
             if (!CheckPreConditions())
             {
-                SetStatus(TaskStatus.Failure);
-                yield break;
+                return TaskStatus.Failure;
             }
 
-            taskAction.Invoke();
+            _taskAction.Invoke();
 
-            while (Status != TaskStatus.Complete)
+            do
             {
                 if (!CheckTaskIntegrity())
                 {
-                    SetStatus(TaskStatus.Failure);
-                    yield break;
+                    return TaskStatus.Failure;
                 }
+                await Task.Yield();
+            } while (CheckEndTask());
 
-                if (CheckEndTask())
-                {
-                    SetStatus(TaskStatus.Complete);
-                    //Debug.Log(Name + " Complete");
-                }
-
-                yield return null;
-            }
-
+            return TaskStatus.Complete;
         }
     }
 }

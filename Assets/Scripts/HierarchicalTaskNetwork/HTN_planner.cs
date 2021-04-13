@@ -14,7 +14,7 @@ public class HTN_planner : MonoBehaviour
     private string _designatedTask;
     private bool _agentsSpawned = false;
     private Dictionary<uint, BaseAgent> _agentIdDictionary = new Dictionary<uint, BaseAgent>();
-    private Dictionary<uint, Task> _idToTask;
+    private Dictionary<uint, HtnTask> _idToTask;
 
     private Dictionary<(string task, InterruptionFlag flag), string> _taskAndFlagToHandlingTask;
     
@@ -41,7 +41,7 @@ public class HTN_planner : MonoBehaviour
         _designatedTask = _timetable.GetCurrentEvent();
              //navSystem = GetComponent<NavigationSystem>();
         _agentIdDictionary = new Dictionary<uint, BaseAgent>();
-        _idToTask = new Dictionary<uint, Task>();
+        _idToTask = new Dictionary<uint, HtnTask>();
              
         _taskAndFlagToHandlingTask = new Dictionary<(string task, InterruptionFlag flag), string>();
         _taskAndFlagToHandlingTask.Add(("Work", InterruptionFlag.Talk), "TalkThenWork");
@@ -112,7 +112,7 @@ public class HTN_planner : MonoBehaviour
 
         foreach (var t in _idToTask.Values)
         {
-            if (t.Status != Task.TaskStatus.InProgress )
+            if (t.Status != HtnTask.TaskStatus.InProgress )
                 t.StartExecution();
             //Debug.Log(t.Name + t.Status);
         }
@@ -127,15 +127,15 @@ public class HTN_planner : MonoBehaviour
         }
     }
 
-    public void AssignTask(BaseAgent a, Task task)
+    public void AssignTask(BaseAgent a, HtnTask htnTask)
     {
         if (_idToTask.ContainsKey(a.ID))
         {
-            _idToTask[a.ID] = task;
+            _idToTask[a.ID] = htnTask;
         }
         else
         {
-            _idToTask.Add(a.ID, task);
+            _idToTask.Add(a.ID, htnTask);
         }
     }
     

@@ -3,10 +3,10 @@
 public class UsingFillingCabinetBehaviour : StateMachineBehaviour
 {
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
-    override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-        animator.gameObject.GetComponent<Agent.BaseAgent>().StartSearchingArchives();  
-    }
+    // override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    // {
+    //     animator.gameObject.GetComponent<Agent.BaseAgent>().SearchArchives();  
+    // }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
     //override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -17,7 +17,7 @@ public class UsingFillingCabinetBehaviour : StateMachineBehaviour
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        animator.gameObject.GetComponent<Agent.BaseAgent>().StopSearchingArchives();
+        animator.gameObject.GetComponent<Agent.BaseAgent>().FinalizeArchiveSearch();
         animator.SetInteger("Action", 0);
     }
 

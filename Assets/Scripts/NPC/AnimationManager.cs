@@ -1,14 +1,22 @@
-﻿using UnityEngine;
+﻿using NPC;
+using UnityEngine;
 
 public class AnimationManager : MonoBehaviour
 {
     private bool _isAnimatingAction;
     private Animator _animator;
 
+    [SerializeField]
+    [Range(0f, 1f)]
+    private float _maxIkStrength;
+    private Transform _sightDirection;
+    
+
     public bool IsAnimatingAction
     {
-        get { return _isAnimatingAction; }
-        set { _isAnimatingAction = value; } }
+        get => _isAnimatingAction;
+        set => _isAnimatingAction = value;
+    }
 
     void Start()
     {
@@ -47,10 +55,16 @@ public class AnimationManager : MonoBehaviour
         _animator.SetTrigger("StopTyping");
     }
 
-    public void StartSearchingFillingCabinet()
+    public void StartSearchingFillingCabinet(SearchArchiveMethod searchArchiveMethod)
     {
         _isAnimatingAction = true;
-        _animator.SetInteger("Action", UnityEngine.Random.Range(2, 4));
+        _animator.SetInteger("Action", searchArchiveMethod == SearchArchiveMethod.SitSearch ? 2 : 3);
+    }
+
+    public void StartSendingFax()
+    {
+        _isAnimatingAction = true;
+        _animator.SetInteger("Action", 1);
     }
 
     public void ForceStop()
@@ -58,6 +72,12 @@ public class AnimationManager : MonoBehaviour
         _animator.SetInteger("Emote",0);
         _animator.SetInteger("Action",0);
         _animator.SetTrigger("Stop");
+    }
+
+    public void LookAt(Transform lookAtTransform)
+    {
+        _animator.SetLookAtPosition(lookAtTransform.position);
+        _animator.SetLookAtWeight(_maxIkStrength);
     }
 
 }

@@ -10,7 +10,7 @@ namespace KnowledgeContainer
 
         public static State operator&(State state1, State state2)
         {
-            if (state1._hostingEnvironment == state2._hostingEnvironment)
+            if (state1._hostingEnvironment != state2._hostingEnvironment)
             {
                 //TODO: throw DifferentEnvironments;
             }

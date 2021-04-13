@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace HierarchicalTaskNetwork
 {
@@ -19,9 +21,9 @@ namespace HierarchicalTaskNetwork
     public class Plan
     {
         private string planName;
-        private Task rootTask;
-        private Task currentTask;
-        private Queue<Task> nextTask;
+        private HtnTask _rootTask;
+        private HtnTask _currentHtnTask;
+        private Queue<HtnTask> nextTask;
 
 
         public enum PlanStatus
@@ -31,59 +33,48 @@ namespace HierarchicalTaskNetwork
             Failure
         }
 
-        private PlanStatus planStatus;
+        private PlanStatus _planStatus;
 
-        public Plan(Task root, string planName)
+        public Plan(HtnTask root, string planName)
         {
             this.planName = planName;
             var tasks = root.DecomposeTask();
-            rootTask = root;
-            nextTask = new Queue<Task>(tasks);
-            currentTask = nextTask.Dequeue();
-            planStatus = PlanStatus.InProgress;
+            _rootTask = root;
+            nextTask = new Queue<HtnTask>(tasks);
+            _currentHtnTask = nextTask.Dequeue();
+            _planStatus = PlanStatus.InProgress;
         }
 
-        public PlanStatus Status
-        {
-            get { return planStatus; }
-        }
+        public PlanStatus Status => _planStatus;
+
+
 
         public void PlanIterate()
         {
-            switch (currentTask.Status)
+            switch (_currentHtnTask.Status)
             {
-                case Task.TaskStatus.Planned:
-                    currentTask.StartExecution();
+                case HtnTask.TaskStatus.Planned:
+                    _currentHtnTask.StartExecution();
                     break;
-                case Task.TaskStatus.InProgress:
+                case HtnTask.TaskStatus.InProgress:
                     break;
-                case Task.TaskStatus.Complete:
+                case HtnTask.TaskStatus.Complete:
                     if (nextTask.Count > 0)
                     {
-                        currentTask = nextTask.Dequeue();
+                        _currentHtnTask = nextTask.Dequeue();
                     }
                     else
                     {
-                        planStatus = PlanStatus.Complete;
+                        _planStatus = PlanStatus.Complete;
                     }
 
                     break;
-                case Task.TaskStatus.Failure:
-                    planStatus = PlanStatus.Failure;
+                case HtnTask.TaskStatus.Failure:
+                    _planStatus = PlanStatus.Failure;
                     break;
-                case Task.TaskStatus.None:
+                case HtnTask.TaskStatus.None:
                     throw new NoneTaskStatusException();
             }
-        }
-
-        public static void TransferControlToTask(Plan p, Task t)
-        {
-            p.rootTask = t;
-        }
-
-        public static bool PlanSatusNotFailure(Plan p)
-        {
-            return p.Status != PlanStatus.Failure;
         }
 
     }

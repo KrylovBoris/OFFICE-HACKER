@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Collections.Viewable;
 using UnityEngine.Assertions;
 
 namespace Agent
@@ -17,16 +18,14 @@ namespace Agent
     public class InterruptionFlagsHandler
     {
 
-        private Dictionary<InterruptionFlag, bool> _flagToValue;
+        private ViewableMap<InterruptionFlag, bool> _flagToValue;
 
         public InterruptionFlagsHandler()
         {
-            _flagToValue = new Dictionary<InterruptionFlag, bool>();
-            var flags = Enum.GetValues(typeof(InterruptionFlag)).Cast<InterruptionFlag>();
-            foreach (var f in flags)
-            {
-                if (f != InterruptionFlag.None) _flagToValue.Add(f, false);
-            }
+            
+            var flags = Enum.GetValues(typeof(InterruptionFlag)).Cast<InterruptionFlag>().
+                ToDictionary(flagType => flagType, flagType => false);
+            _flagToValue = new ViewableMap<InterruptionFlag, bool>(flags);
             Assert.IsTrue(NoFlagsRaised());
         }
 

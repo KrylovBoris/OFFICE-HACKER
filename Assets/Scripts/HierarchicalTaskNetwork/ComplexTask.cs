@@ -1,66 +1,67 @@
-using System.Collections;
+
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace HierarchicalTaskNetwork
 {
-public class ComplexTask: Task
-{
-    public delegate Task[] DecompositionMethod();
+    public class ComplexTask: HtnTask
+    {
+        private HtnTask _currentHtnTask;
+        private Queue<HtnTask> _taskExecutionPlan;
+        public delegate HtnTask[] DecompositionMethod();
+        
+        
+        public override TaskType Type => TaskType.Complex;
 
-    private Plan _taskExecutionPlan;
-    
-    public override TaskType Type
-    {
-        get { return TaskType.Complex; }
-    }
-    
-    readonly protected DecompositionMethod Decompose;
-    
-    public ComplexTask(string name,
-        CoroutineStarter coroutineRunner,
-        DecompositionMethod decompose,
-        Condition[] conditions = null, 
-        Condition[] rules = null) : base(name, coroutineRunner, conditions, rules)
-    {
-        Decompose = decompose;
-    }
-
-    public override Task[] DecomposeTask()
-    {
-        return Decompose.Invoke();
-    }
-
-    public override void StartExecution()
-    {
-        SetStatus(TaskStatus.InProgress);
-        _taskExecutionPlan = new Plan(this, this.Name);
-        base.StartExecution();
-    }
-
-    protected override IEnumerator Execution()
-    {
-        this.SetStatus(TaskStatus.InProgress);
-        if (!CheckPreConditions())
+        private readonly DecompositionMethod _decompose;
+        
+        public ComplexTask(string name,
+            DecompositionMethod decompose,
+            Condition[] conditions = null, 
+            Condition[] rules = null) : base(name, conditions, rules)
         {
-            this.SetStatus(TaskStatus.Failure);
-            yield break;
+            _decompose = decompose;
         }
 
-        while (this.Status != TaskStatus.Complete)
+        public override HtnTask[] DecomposeTask()
         {
-            if (!CheckTaskIntegrity() || _taskExecutionPlan.Status == Plan.PlanStatus.Failure)
+            return _decompose.Invoke();
+        }
+
+        internal override async Task<TaskStatus> Execution()
+        {
+            if (!CheckPreConditions())
             {
-                this.SetStatus(TaskStatus.Failure);
-                yield break;
+                return TaskStatus.Failure;
             }
 
-            _taskExecutionPlan.PlanIterate();
+            var planStatus = await ExecutePlan();
             
-            if (_taskExecutionPlan.Status == Plan.PlanStatus.Complete)
-            {
-                this.SetStatus(TaskStatus.Complete);
-            }
-            yield return null;
+            return planStatus;
         }
+
+        private async Task<TaskStatus> ExecutePlan()
+        {
+            while (_taskExecutionPlan.Any())
+            {
+                if (!CheckTaskIntegrity())
+                {
+                    return TaskStatus.Failure;
+                }
+                
+                _currentHtnTask = _taskExecutionPlan.Dequeue();
+                
+                var status = await _currentHtnTask.Execution();
+                
+                if (status == TaskStatus.Failure)
+                {
+                    return TaskStatus.Failure;
+                }
+            }
+            return TaskStatus.Complete;
+        }
+        
     }
-}
 }

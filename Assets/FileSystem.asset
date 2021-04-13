@@ -14,23 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   paths:
   - root
-  - root\Downloads
-  - root\Music
-  - root\Music\Metallica
-  - root\Music\Metallica\ONE.mp3
-  - root\Music\Metallica\SEEK&DESTROY.mp3
-  - root\Music\Metallica\The Four Horsemen.mp3
-  - root\Music\Mozart
-  - root\Music\Mozart\Piano Sonata No. 16.mp3
-  - root\Music\Mozart\Requiem.mp3
-  - root\Music\Mozart\Turkish March.mp3
-  - root\Music\Yakety Sax.mp3
-  - root\Pictures
-  - root\Pictures\Cute puppy.png
-  - root\Pictures\Flower field.png
-  - root\Pictures\Three puppies.jpg
-  - root\system
-  - root\system\data
-  - root\system\obb
-  - root\user
-  sizes: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff180000003800000057000000ffffffffffffffff450100007b00000000010000510000007b00000080000000ff000000
+  - root\1
+  - root\1\32.txt
+  - root\2
+  - root\2\1232.png
+  sizes: ffffffffffffffffffffffffffffffff7b000000
