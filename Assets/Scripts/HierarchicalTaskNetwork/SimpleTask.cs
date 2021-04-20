@@ -52,7 +52,7 @@ namespace HierarchicalTaskNetwork
                     return TaskStatus.Failure;
                 }
                 await Task.Yield();
-            } while (CheckEndTask());
+            } while (!CheckEndTask());
 
             return TaskStatus.Complete;
         }

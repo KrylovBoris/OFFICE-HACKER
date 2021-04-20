@@ -118,10 +118,8 @@ namespace Agent
                     }, 
                     info =>
                     {
-                        return (TaskCreationProcedure) (() => (HtnTask)info.CreateDelegate(typeof(Func<HtnTask>)).DynamicInvoke());
+                        return (TaskCreationProcedure) (() => (HtnTask)info.CreateDelegate(typeof(Func<HtnTask>), this).DynamicInvoke());
                     });
-
-
         }
 
         public void FinalizeArchiveSearch()

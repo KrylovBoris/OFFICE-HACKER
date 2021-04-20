@@ -5,7 +5,8 @@ public enum EventType
 {
     WorkTime,
     Break,
-    Lunch
+    Lunch,
+    Empty
 }
 
 [System.Serializable]
@@ -39,6 +40,14 @@ public class Timetable : MonoBehaviour
         _currentTime = GameManager.gm.StartingTime;
         _minuteDuration = GameManager.gm.MinuteDuration;
         _seconds = 0;
+        foreach (var timeTableEvent in timeTable)
+        {
+            if (GameManager.gm.SecondsFromStart >= timeTableEvent.timeInSecondsFromStartBegin &&
+                timeTableEvent.timeInSecondsFromStartEnd > GameManager.gm.SecondsFromStart)
+            {
+                _currentEvent = timeTableEvent.@event;
+            }
+        }
     }
 
     // Update is called once per frame
@@ -46,8 +55,8 @@ public class Timetable : MonoBehaviour
     {
         foreach (var timeTableEvent in timeTable)
         {
-            if (GameManager.gm.SecondsFromStart > timeTableEvent.timeInSecondsFromStartBegin &&
-                timeTableEvent.timeInSecondsFromStartEnd >= GameManager.gm.SecondsFromStart)
+            if (GameManager.gm.SecondsFromStart >= timeTableEvent.timeInSecondsFromStartBegin &&
+                timeTableEvent.timeInSecondsFromStartEnd > GameManager.gm.SecondsFromStart)
             {
                 _currentEvent = timeTableEvent.@event;
             }
@@ -58,6 +67,8 @@ public class Timetable : MonoBehaviour
     {
         switch (_currentEvent)
         {
+            case EventType.Empty:
+                return "Empty";
             case EventType.Break:
                 return "Break";
             case EventType.Lunch:

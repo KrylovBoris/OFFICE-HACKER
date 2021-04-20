@@ -81,12 +81,9 @@ namespace HierarchicalTaskNetwork
             {
                 foreach (var condition in collection)
                 {
-
                     UnityEngine.Debug.Assert(condition != null);
                     result &= condition.Invoke();
                     if (!result) return false;
-
-
                 }
             }
             catch (NullReferenceException e)
@@ -114,7 +111,7 @@ namespace HierarchicalTaskNetwork
 
         internal virtual async Task<TaskStatus> Execution()
         {
-            return TaskStatus.None;
+            return TaskStatus.Complete;
         }
 
         public async void StartExecution()

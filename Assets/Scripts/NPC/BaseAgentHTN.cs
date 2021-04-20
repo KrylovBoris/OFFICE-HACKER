@@ -373,7 +373,7 @@ namespace Agent
         #endregion
         
         #region SimpleTasks
-        
+        [HtnRootTask("Empty")]
         protected SimpleTask CreateEmptyTask()
         {
             SimpleTask.TaskAction action = () => { };
