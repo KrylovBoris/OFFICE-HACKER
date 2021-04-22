@@ -121,7 +121,7 @@ namespace HierarchicalTaskNetwork
         public async void StartExecution()
         {
             UnityEngine.Debug.Log($"Starting task {Name}");
-            await Execution();
+            Status = await Execution();
             UnityEngine.Debug.Log($"Task {Name} finished");
         }
 

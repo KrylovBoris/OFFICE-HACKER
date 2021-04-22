@@ -160,6 +160,14 @@ namespace Agent
             
 	        public void AdjustPosition()
             {
+                if (_activeToken is ArchiveSearchToken archiveToken)
+                {
+                    _navMeshDestination = archiveToken.SearchingSpot;
+                }
+                if (_activeToken is FaxMachineToken faxToken)
+                {
+                    _navMeshDestination = faxToken.SearchingSpot;
+                }
                 _navMeshAgent.stoppingDistance = standardStoppingDistance;
                 _navMeshAgent.SetDestination(GetDestination());
                 StartCoroutine(CoroutineUtils.ConditionedAction(IsNearDestination, AlignWithDestination));
@@ -242,7 +250,7 @@ namespace Agent
             {
                 var res = Random.Range(0, 100) < 75;
                 //TODO: Personality-based choice
-                return false;
+                return res;
             }
 	        public bool CanAnimate() => !_animationManager.IsAnimatingAction;
 
