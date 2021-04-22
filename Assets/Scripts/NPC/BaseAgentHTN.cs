@@ -6,6 +6,7 @@ using HierarchicalTaskNetwork;
 using JetBrains.Collections.Viewable;
 using NPC;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Agent
 {
@@ -15,14 +16,14 @@ namespace Agent
 	        public void GoToPC()
             {
                 _navMeshDestination = workingPlace.navMeshDestination;
-                _navMeshAgent.SetDestination(_navMeshDestination.position);
+                _navMeshAgent.SetDestination(GetDestination());
             }
             
             public void GoToArchives()
             {
                 _navMeshDestination = _activeArchiveZone.WaitingZone;
                 _navMeshAgent.stoppingDistance = _activeArchiveZone.WaitingZoneRadius;
-                _navMeshAgent.SetDestination(_navMeshDestination.position);
+                _navMeshAgent.SetDestination(GetDestination());
             }
 	        public void TurnOnPC() => workingPlace.computer.TurnOn();
             public void TurnOffPC() => workingPlace.computer.TurnOff();
@@ -32,7 +33,6 @@ namespace Agent
                 StartTypingPassword();
                 StartCoroutine(CoroutineUtils.DelayedAction(_personality.passwordTypingTime, 
                         SubmitPassword));
-                throw new NotImplementedException();
             }
         
             
@@ -62,7 +62,7 @@ namespace Agent
                 transform.parent = workingPlace.chair.transform;
                 workingPlace.CharacterSeated(_personality);
             }
-	        public void TurnToComputer() => workingPlace.chair.Turn(90.0f);
+	        public void TurnToComputer() => workingPlace.TurnToComputer();
             public void TurnAwayFromPC()
             {
                 workingPlace.chair.ResetSeat();
@@ -122,11 +122,11 @@ namespace Agent
             }
 	        public void Emote()
             {
-                throw new NotImplementedException();
+                _animationManager.EmoteAny();
             }
 	        public void InitTalk()
             {
-                throw new NotImplementedException();
+                _animationManager.LookAt(_currentConversation.GetInterlocutor(this).Head);
             }
 	        public void WaitPlayerResponse()
             {
@@ -155,13 +155,13 @@ namespace Agent
             {
                 _navMeshDestination = _activeFaxZone.WaitingZone;
                 _navMeshAgent.stoppingDistance = _activeFaxZone.WaitingZoneRadius;
-                _navMeshAgent.SetDestination(_navMeshDestination.position);
+                _navMeshAgent.SetDestination(GetDestination());
             }
             
 	        public void AdjustPosition()
             {
                 _navMeshAgent.stoppingDistance = standardStoppingDistance;
-                _navMeshAgent.SetDestination(_navMeshDestination.position);
+                _navMeshAgent.SetDestination(GetDestination());
                 StartCoroutine(CoroutineUtils.ConditionedAction(IsNearDestination, AlignWithDestination));
             }
 	        public void UseFax()
@@ -183,16 +183,13 @@ namespace Agent
             }
 	        public void WaitNPCResponse()
             {
-                throw new NotImplementedException();
+                _currentConversation.RequestLine();
             }
 	        public void TalkToNPC()
             {
-                throw new NotImplementedException();
+                _animationManager.SayLine();
             }
-	        public void WaitForInterlocutor()
-            {
-                throw new NotImplementedException();
-            }
+	        public void WaitForInterlocutor() {}
 	        public void WalkToKitchen()
             {
                 throw new NotImplementedException();
@@ -243,9 +240,9 @@ namespace Agent
             }
 	        public bool WillWorkOnPC()
             {
-                var res = true;
-                throw new NotImplementedException();
-                return res;
+                var res = Random.Range(0, 100) < 75;
+                //TODO: Personality-based choice
+                return false;
             }
 	        public bool CanAnimate() => !_animationManager.IsAnimatingAction;
 
@@ -285,8 +282,8 @@ namespace Agent
             }
 	        public bool WillSearchArchives()
             {
-                var res = true;
-                throw new NotImplementedException();
+                var res = Random.Range(0, 100) < 50;
+                //TODO: Personality-based choice
                 return res;
             }
             
@@ -312,8 +309,7 @@ namespace Agent
             }
 	        public bool HasToStopChat()
             {
-                var res = true;
-                throw new NotImplementedException();
+                var res = HasRequestedToken();
                 return res;
             }
 	        public bool InterlocutorFound()
@@ -346,13 +342,8 @@ namespace Agent
                 throw new NotImplementedException();
                 return res;
             }
-	        public bool CanSitDown()
-            {
-                var res = true;
-                throw new NotImplementedException();
-                return res;
-            }
-	        public bool CanSit()
+
+            public bool CanSit()
             {
                 var res = true;
                 throw new NotImplementedException();
@@ -361,15 +352,19 @@ namespace Agent
 	        public bool HasUSB()
             {
                 var res = true;
-                throw new NotImplementedException();
+                //TODO USB pickup check;
                 return res;
             }
 	        public bool WillPlugUsb()
             {
-                var res = true;
-                throw new NotImplementedException();
-                return res;
+                return new RandomEvent(_personality.UsbAttackProbability).HasEventHappened();
             }
+            
+            private bool HasNpcResponse()
+            {
+                return _currentConversation.HasRequestedLine(this);
+            }
+            
         #endregion
         
         #region SimpleTasks
@@ -1001,7 +996,7 @@ namespace Agent
 
             HtnTask.Condition[] finishConditions =
             {
-                () => HasToStopChat()
+                () => HasNpcResponse()
             };
 
             SimpleTask.TaskAction action = WaitNPCResponse;
@@ -1042,8 +1037,7 @@ namespace Agent
 
             HtnTask.Condition[] finishConditions =
             {
-                () => InterlocutorFound(),
-                () => HasToStopChat()
+                () => InterlocutorFound() || HasToStopChat()
             };
 
             SimpleTask.TaskAction action = WaitForInterlocutor;
@@ -1257,7 +1251,7 @@ namespace Agent
         
             HtnTask.Condition[] integrityRules = 
             {
-                () => StopFlag(),
+                () => !StopFlag(),
             };
               
             ComplexTask.DecompositionMethod method = DecomposeWorkOnPC;
@@ -1293,7 +1287,7 @@ namespace Agent
         
             HtnTask.Condition[] integrityRules = 
             {
-                () => StopFlag(),
+                () => !StopFlag(),
             };
               
             ComplexTask.DecompositionMethod method = DecomposeSearchArchivesRoutine;
@@ -1337,16 +1331,14 @@ namespace Agent
         public HtnTask[] DecomposeFinishAllActivities()
         {
             var tasks = new List<HtnTask>();
-            if(IsWorking()) {
-                if(IsLoggedIn()) {
-                    tasks.Add(CreateLogOut());
-                }
-                if(IsTyping()) {
-                    tasks.Add(CreateStopTyping());
-                }
-                if(IsComputerOn()) {
-                    tasks.Add(CreateTurnOffPC());
-                }
+            if(IsLoggedIn()) {
+                tasks.Add(CreateLogOut());
+            }
+            if(IsTyping()) {
+                tasks.Add(CreateStopTyping());
+            }
+            if(IsComputerOn()) {
+                tasks.Add(CreateTurnOffPC());
             }
             if(IsSitting()) {
                 tasks.Add(CreateStand());
@@ -1392,7 +1384,7 @@ namespace Agent
     
             HtnTask.Condition[] integrityRules = 
             {
-                () => StopFlag(),
+                () => !StopFlag(),
             };
           
             ComplexTask.DecompositionMethod method = DecomposeWorkAtPC;
@@ -1490,7 +1482,7 @@ namespace Agent
         
             HtnTask.Condition[] integrityRules = 
             {
-                () => StopFlag(),
+                () => !StopFlag(),
             };
               
             ComplexTask.DecompositionMethod method = DecomposeFaxRoutine;
@@ -1525,7 +1517,7 @@ namespace Agent
         
             HtnTask.Condition[] integrityRules = 
             {
-                () => StopFlag(),
+                () => !StopFlag(),
             };
               
             ComplexTask.DecompositionMethod method = DecomposeInitiateTalkNPC;
@@ -1540,7 +1532,7 @@ namespace Agent
         public HtnTask[] DecomposeInitiateTalkNPC()
         {
             var tasks = new List<HtnTask>();
-            if(HasToStopChat()) {
+            if(!HasToStopChat()) {
                 if(InterlocutorFound()) {
                     tasks.Add(CreateInitiateDialogueRoutine());
                     tasks.Add(CreateChattingNPC());
@@ -1655,7 +1647,7 @@ namespace Agent
         
             HtnTask.Condition[] integrityRules = 
             {
-                StopFlag,
+                () => !StopFlag(),
             };
               
             ComplexTask.DecompositionMethod method = DecomposeBreak;

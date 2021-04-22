@@ -82,4 +82,10 @@ public string NoteText()
     {
         return "Password: " + KnownPassword;
     }
+
+    public float UsbAttackProbability()
+    {
+        //TODO USB attack
+        return 0f;
+    }
 }

@@ -32,10 +32,13 @@ namespace HierarchicalTaskNetwork
 
         internal override async Task<TaskStatus> Execution()
         {
+            Status = TaskStatus.InProgress;
             if (!CheckPreConditions())
             {
                 return TaskStatus.Failure;
             }
+
+            _taskExecutionPlan = new Queue<HtnTask>(DecomposeTask());
 
             var planStatus = await ExecutePlan();
             

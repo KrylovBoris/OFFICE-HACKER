@@ -8,9 +8,18 @@ public class AnimationManager : MonoBehaviour
 
     [SerializeField]
     [Range(0f, 1f)]
-    private float _maxIkStrength;
+    private float maxIkStrength;
     private Transform _sightDirection;
-    
+    private static readonly int Vertical = Animator.StringToHash("Vertical");
+    private static readonly int Horizontal = Animator.StringToHash("Horizontal");
+    private static readonly int Sit = Animator.StringToHash("Sit");
+    private static readonly int Stand = Animator.StringToHash("Stand");
+    private static readonly int Typing = Animator.StringToHash("StartTyping");
+    private static readonly int StopTyping1 = Animator.StringToHash("StopTyping");
+    private static readonly int Action = Animator.StringToHash("Action");
+    private static readonly int EmoteHash = Animator.StringToHash("Emote");
+    private static readonly int Stop = Animator.StringToHash("Stop");
+
 
     public bool IsAnimatingAction
     {
@@ -27,57 +36,68 @@ public class AnimationManager : MonoBehaviour
     public void UpdateMoveAnimation(Vector3 movementRelativeDirection)
     {
         var animationVector = transform.InverseTransformDirection(movementRelativeDirection);
-        _animator.SetFloat("Vertical", animationVector.z);
-        _animator.SetFloat("Horizontal", animationVector.x);
+        _animator.SetFloat(Vertical, animationVector.z);
+        _animator.SetFloat(Horizontal, animationVector.x);
     }
 
     public void SitDownOnChair()
     {
         _isAnimatingAction = true;
-        _animator.SetTrigger("Sit");
+        _animator.SetTrigger(Sit);
     }
     
     public void StandUpFromChair()
     {
         _isAnimatingAction = true;
-        _animator.SetTrigger("Stand");
+        _animator.SetTrigger(Stand);
     }
 
     public void StartTyping()
     {
         _isAnimatingAction = true;
-        _animator.SetTrigger("StartTyping");
+        _animator.SetTrigger(Typing);
     }
 
     public void StopTyping()
     {
         _isAnimatingAction = true;
-        _animator.SetTrigger("StopTyping");
+        _animator.SetTrigger(StopTyping1);
     }
 
     public void StartSearchingFillingCabinet(SearchArchiveMethod searchArchiveMethod)
     {
         _isAnimatingAction = true;
-        _animator.SetInteger("Action", searchArchiveMethod == SearchArchiveMethod.SitSearch ? 2 : 3);
+        _animator.SetInteger(Action, searchArchiveMethod == SearchArchiveMethod.SitSearch ? 2 : 3);
     }
 
     public void StartSendingFax()
     {
         _isAnimatingAction = true;
-        _animator.SetInteger("Action", 1);
+        _animator.SetInteger(Action, 1);
     }
 
     public void ForceStop()
     {
-        _animator.SetInteger("Emote",0);
-        _animator.SetInteger("Action",0);
-        _animator.SetTrigger("Stop");
+        _animator.SetInteger(EmoteHash,0);
+        _animator.SetInteger(Action,0);
+        _animator.SetTrigger(Stop);
     }
 
     public void LookAt(Transform lookAtTransform)
     {
         _animator.SetLookAtPosition(lookAtTransform.position);
-        _animator.SetLookAtWeight(_maxIkStrength);
+        _animator.SetLookAtWeight(maxIkStrength);
     }
 
+    public void EmoteAny()
+    {
+        _isAnimatingAction = true;
+        _animator.SetInteger(EmoteHash, Random.Range(1, 18));
+    }
+
+    public void SayLine()
+    {
+        _isAnimatingAction = true;
+        _animator.SetInteger(EmoteHash, Random.Range(1, 4));
+    }
 }

@@ -1,14 +1,5 @@
 ﻿using UnityEngine;
 
-/*
- * History:
- * 
- * Date         Author      Description
- * 
- * 03.03.2019   aknorre     Created
- * 16.03.2019   bkrylov     Allocated to Component Menu
- * 
- */
 [AddComponentMenu("ProjectFaceless/Tools/Billboard")]
 public class Billboard : MonoBehaviour
 {

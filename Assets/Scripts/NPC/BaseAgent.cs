@@ -47,6 +47,7 @@ namespace Agent
         private bool _hasToStop;
         [SerializeField] private float minWaitTime;
         [SerializeField] private float maxWaitTime;
+        private Conversation _currentConversation;
 
         public bool IsOccupied
         {
@@ -93,7 +94,7 @@ namespace Agent
         {
             // if ((transform.position - pos).magnitude <= 0.05)
             //     Debug.Log((transform.position - pos).magnitude);
-            return (transform.position - pos).magnitude <= 0.05;
+            return (transform.position - pos).magnitude <= _navMeshAgent.stoppingDistance;
         }
         public HtnTask GetTaskByName(string task)
         {
@@ -136,6 +137,11 @@ namespace Agent
             _activeFaxZone = null;
             _activeToken.Finish();
             _activeToken = null;
+        }
+
+        public Vector3 GetDestination()
+        {
+            return _navMeshDestination.position;
         }
     }
 }

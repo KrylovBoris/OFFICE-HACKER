@@ -9,11 +9,9 @@ namespace NPC
         where T : AiToken 
     {
         [SerializeField] private Transform[] availableSpots;
-
-        [SerializeField] private Transform waitingZone;
         [SerializeField] private float waitingZoneRadius;
 
-        public Transform WaitingZone => waitingZone;
+        public Transform WaitingZone => this.transform;
 
         public float WaitingZoneRadius => waitingZoneRadius;
 

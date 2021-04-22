@@ -2,6 +2,7 @@
 
 public class UsingFillingCabinetBehaviour : StateMachineBehaviour
 {
+    private static readonly int Action = Animator.StringToHash("Action");
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     // override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     // {
@@ -18,7 +19,7 @@ public class UsingFillingCabinetBehaviour : StateMachineBehaviour
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         animator.gameObject.GetComponent<Agent.BaseAgent>().FinalizeArchiveSearch();
-        animator.SetInteger("Action", 0);
+        animator.SetInteger(Action, 0);
     }
 
     // OnStateMove is called right after Animator.OnAnimatorMove()

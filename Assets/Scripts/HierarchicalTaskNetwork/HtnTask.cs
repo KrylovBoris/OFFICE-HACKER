@@ -69,7 +69,11 @@ namespace HierarchicalTaskNetwork
 
         public virtual TaskType Type => TaskType.Empty;
 
-        public TaskStatus Status => taskStatus;
+        public TaskStatus Status
+        {
+            get => taskStatus;
+            set => taskStatus = value;
+        }
 
 
         #region Checks
