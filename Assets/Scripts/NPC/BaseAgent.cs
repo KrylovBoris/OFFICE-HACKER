@@ -17,6 +17,13 @@ namespace Agent
 
         public WorkPlace workingPlace;
         public Department department;
+
+        [SerializeField]
+        private Transform _head;
+
+        public Transform Head => _head;
+
+        public Personality Personality => _personality;
         
         [SerializeField]
         private float standardStoppingDistance = 0.05f;
@@ -142,6 +149,11 @@ namespace Agent
         public Vector3 GetDestination()
         {
             return _navMeshDestination.position;
+        }
+
+        public void SetConversation(Conversation c)
+        {
+            _currentConversation = c;
         }
 
         public void DestroyConversation()

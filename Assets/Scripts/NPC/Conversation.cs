@@ -12,6 +12,8 @@ namespace NPC
         {
             First = first;
             Second = second;
+            First.Agent.SetConversation(this);
+            Second.Agent.SetConversation(this);
         }
 
         public Interlocutor GetInterlocutor(BaseAgent baseAgent)
