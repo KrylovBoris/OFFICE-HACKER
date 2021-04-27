@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Agent;
 using UnityEngine;
 
 namespace NPC
@@ -17,11 +18,13 @@ namespace NPC
 
         private Queue<RequestToken> _pendingRequests;
         private Queue<Transform> _availableQueue;
+        private Queue<BaseAgent> _waitingAgents;
 
         private void Start()
         {
             _pendingRequests = new Queue<RequestToken>();
             _availableQueue = new Queue<Transform>(availableSpots);
+            _waitingAgents = new Queue<BaseAgent>();
         }
 
         private void Update()
@@ -57,6 +60,11 @@ namespace NPC
         protected Transform GetArchiveAvailableSpot()
         {
             return !_availableQueue.Any() ? null : _availableQueue.Dequeue();
+        }
+        
+        public void PlaceWaitingAgent(BaseAgent baseAgent)
+        {
+            _waitingAgents.Enqueue(baseAgent);
         }
     }
 }

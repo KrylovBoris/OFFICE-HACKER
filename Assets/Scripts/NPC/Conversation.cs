@@ -32,5 +32,11 @@ namespace NPC
         {
             throw new System.NotImplementedException();
         }
+
+        public void Stop()
+        {
+            First.Agent.DestroyConversation();
+            Second.Agent.DestroyConversation();
+        }
     }
 }

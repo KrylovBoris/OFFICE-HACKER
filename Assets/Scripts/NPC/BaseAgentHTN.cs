@@ -24,6 +24,10 @@ namespace Agent
                 _navMeshDestination = _activeArchiveZone.WaitingZone;
                 _navMeshAgent.stoppingDistance = _activeArchiveZone.WaitingZoneRadius;
                 _navMeshAgent.SetDestination(GetDestination());
+                CoroutineUtils.ConditionedAction(IsNearDestination, () =>
+                {
+                    _activeArchiveZone.PlaceWaitingAgent(this);
+                });
             }
 	        public void TurnOnPC() => workingPlace.computer.TurnOn();
             public void TurnOffPC() => workingPlace.computer.TurnOff();
@@ -177,6 +181,10 @@ namespace Agent
                 _navMeshAgent.enabled = false;
                 _animationManager.StartSendingFax();
             }
+            private void EndConversation()
+            {
+                _currentConversation.Stop();
+            }
 	        public void Abort()
             {
                 throw new NotImplementedException();
@@ -197,7 +205,11 @@ namespace Agent
             {
                 _animationManager.SayLine();
             }
-	        public void WaitForInterlocutor() {}
+
+            public void WaitForInterlocutor()
+            {
+                
+            }
 	        public void WalkToKitchen()
             {
                 throw new NotImplementedException();
@@ -240,6 +252,12 @@ namespace Agent
             {
                 return IsAgentInPosition(_navMeshAgent.destination);
             }
+            
+            public bool IsNearPC()
+            {
+                return IsAgentInPosition(workingPlace.navMeshDestination.position);
+            }
+            
 	        public bool IsWorking()
             {
                 var res = true;
@@ -279,13 +297,12 @@ namespace Agent
             public bool WillChatNPC()
             {
                 var res = true;
-                throw new NotImplementedException();
+                //TODO Personality check
                 return res;
             }
 	        public bool WillEmote()
             {
-                var res = true;
-                throw new NotImplementedException();
+                var res = Random.Range(0, 1.0f) > 0.25;
                 return res;
             }
 	        public bool WillSearchArchives()
@@ -317,14 +334,12 @@ namespace Agent
             }
 	        public bool HasToStopChat()
             {
-                var res = HasRequestedToken();
+                var res = HasRequestedToken() || _currentConversation == null;
                 return res;
             }
 	        public bool InterlocutorFound()
             {
-                var res = true;
-                throw new NotImplementedException();
-                return res;
+                return _currentConversation != null;
             }
 	        public bool CanChat()
             {
@@ -1213,6 +1228,28 @@ namespace Agent
             return task;
         }
         
+        private HtnTask CreateEndConversation()
+        {
+            HtnTask.Condition[] preConditions =
+            {
+                () => HasUSB()
+            };
+
+            var integrityRules = HtnTask.EmptyCondition;
+
+            var finishConditions = HtnTask.EmptyCondition;
+
+            SimpleTask.TaskAction action = EndConversation;
+
+            var task = new SimpleTask(
+                name + "EndConversation",
+                action,
+                preConditions,
+                integrityRules,
+                finishConditions);
+            return task;
+        }
+
         #endregion
         
         #region ComplexTasks
@@ -1240,6 +1277,10 @@ namespace Agent
                 tasks.Add(CreateWorkOnPC());
             }
             else {
+                if (IsSitting())
+                {
+                    tasks.Add(CreateFinishAllActivities());
+                }
                 if(WillSearchArchives()) {
                     tasks.Add(CreateRequestArchiveToken());
                     tasks.Add(CreateSearchArchivesRoutine());
@@ -1249,7 +1290,6 @@ namespace Agent
                     tasks.Add(CreateFaxRoutine());
                 }
             }
-            tasks.Add(CreateFinishAllActivities());
             return tasks.ToArray();
         }
 
@@ -1274,7 +1314,8 @@ namespace Agent
         public HtnTask[] DecomposeWorkOnPC()
         {
             var tasks = new List<HtnTask>();
-            tasks.Add(CreateGoToPC());
+            if (!IsNearPC() && !IsSitting())
+                tasks.Add(CreateGoToPC());
             if(IsSitting()) {
             }
             else {
@@ -1347,6 +1388,11 @@ namespace Agent
             }
             if(IsComputerOn()) {
                 tasks.Add(CreateTurnOffPC());
+            }
+
+            if (IsFacingComputer())
+            {
+                tasks.Add(CreateTurnFromComputer());
             }
             if(IsSitting()) {
                 tasks.Add(CreateStand());
@@ -1641,13 +1687,14 @@ namespace Agent
             tasks.Add(CreateEmote());
             tasks.Add(CreateNPCLine());
             if(HasToStopChat()) {
+                tasks.Add(CreateEndConversation());
             }
             else {
                 tasks.Add(CreateChattingNPC());
             }
             return tasks.ToArray();
         }
-        
+
         [HtnRootTask("Break")]
 	    public ComplexTask CreateBreak()
         {

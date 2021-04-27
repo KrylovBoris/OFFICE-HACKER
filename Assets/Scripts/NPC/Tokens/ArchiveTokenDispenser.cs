@@ -1,3 +1,5 @@
+using Agent;
+
 namespace NPC
 {
     public class ArchiveTokenDispenser : TokenDispenser<ArchiveSearchToken>

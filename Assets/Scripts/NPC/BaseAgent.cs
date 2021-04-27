@@ -143,5 +143,10 @@ namespace Agent
         {
             return _navMeshDestination.position;
         }
+
+        public void DestroyConversation()
+        {
+            _currentConversation = null;
+        }
     }
 }
