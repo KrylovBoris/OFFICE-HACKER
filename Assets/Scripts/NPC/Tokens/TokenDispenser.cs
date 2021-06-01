@@ -15,14 +15,12 @@ namespace NPC
 
         private Queue<RequestToken> _pendingRequests;
         private Queue<Transform> _availableQueue;
-        private Queue<BaseAgent> _waitingAgents;
         
 
         private void Start()
         {
             _pendingRequests = new Queue<RequestToken>();
             _availableQueue = new Queue<Transform>(availableSpots);
-            _waitingAgents = new Queue<BaseAgent>();
             _waitingZone = GetComponent<IWaitingZone>();
         }
 
@@ -37,17 +35,6 @@ namespace NPC
                     var token = ArchiveSearchToken.MakeToken(spot);
                     request.FulfilRequest(token);
                 }
-            }
-
-            if (_waitingAgents.Count > 1)
-            {
-                //TODO make agents choose friends as dialog targets
-                var agent = _waitingAgents.Dequeue();
-
-                var interlocutor1 = new Interlocutor(agent.Head, agent.Personality, agent);
-                agent = _waitingAgents.Dequeue();
-                var interlocutor2 = new Interlocutor(agent.Head, agent.Personality, agent);
-                var conversation = new Conversation(interlocutor1, interlocutor2);
             }
         }
 
@@ -70,11 +57,6 @@ namespace NPC
         protected Transform GetArchiveAvailableSpot()
         {
             return !_availableQueue.Any() ? null : _availableQueue.Dequeue();
-        }
-        
-        public void PlaceWaitingAgent(BaseAgent baseAgent)
-        {
-            _waitingAgents.Enqueue(baseAgent);
         }
     }
 }

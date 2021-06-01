@@ -65,9 +65,6 @@ namespace NPC
         [SerializeField]
         private Transform head;
 
-        public Personality Personality => _personality;
-        public Transform Head => head;
-
         // Start is called before the first frame update
         protected void Awake()
         {
@@ -161,7 +158,6 @@ namespace NPC
 
         private void AddAgentToZone(BaseAgent agent)
         {
-            _activeZone.PlaceWaitingAgent(agent);
             WaitingZone.AddInterlocutorCandidate(agent);
         }
 
