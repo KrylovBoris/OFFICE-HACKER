@@ -20,6 +20,13 @@ namespace NPC
 
         public WorkPlace workingPlace;
         public Department department;
+
+        [SerializeField]
+        private Transform _head;
+
+        public Transform Head => _head;
+
+        public Personality Personality => _personality;
         
         public delegate HtnTask TaskCreationProcedure();
         protected Dictionary<string, TaskCreationProcedure> AgentTaskDictionary;
@@ -161,6 +168,11 @@ namespace NPC
         private Vector3 GetDestination()
         {
             return _navMeshDestination.position;
+        }
+
+        public void SetConversation(Conversation c)
+        {
+            _currentConversation = c;
         }
 
         public void DestroyConversation()

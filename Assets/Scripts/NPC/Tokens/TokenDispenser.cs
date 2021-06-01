@@ -38,6 +38,17 @@ namespace NPC
                     request.FulfilRequest(token);
                 }
             }
+
+            if (_waitingAgents.Count > 1)
+            {
+                //TODO make agents choose friends as dialog targets
+                var agent = _waitingAgents.Dequeue();
+
+                var interlocutor1 = new Interlocutor(agent.Head, agent.Personality, agent);
+                agent = _waitingAgents.Dequeue();
+                var interlocutor2 = new Interlocutor(agent.Head, agent.Personality, agent);
+                var conversation = new Conversation(interlocutor1, interlocutor2);
+            }
         }
 
         public abstract AiToken RequestToken();

@@ -271,7 +271,7 @@ namespace NPC
             }
 	        public bool WillWorkOnPC()
             {
-                var res = Random.Range(0, 100) < 75;
+                var res = Random.Range(0, 100) < 50;
                 //TODO: Personality-based choice
                 return res;
             }
@@ -1286,6 +1286,7 @@ namespace NPC
                 {
                     tasks.Add(CreateFinishAllActivities());
                 }
+
                 if(WillSearchArchives()) {
                     tasks.Add(CreateRequestArchiveToken());
                     tasks.Add(CreateSearchArchivesRoutine());
