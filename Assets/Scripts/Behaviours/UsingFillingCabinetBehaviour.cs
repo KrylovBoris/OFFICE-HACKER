@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using NPC;
+using UnityEngine;
 
 public class UsingFillingCabinetBehaviour : StateMachineBehaviour
 {
@@ -18,7 +19,7 @@ public class UsingFillingCabinetBehaviour : StateMachineBehaviour
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        animator.gameObject.GetComponent<Agent.BaseAgent>().FinalizeArchiveSearch();
+        animator.gameObject.GetComponent<BaseAgent>().FinalizeArchiveSearch();
         animator.SetInteger(Action, 0);
     }
 

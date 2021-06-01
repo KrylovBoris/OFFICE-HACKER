@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Threading.Tasks;
+using JetBrains.Lifetimes;
+using UnityEngine;
 
 namespace HierarchicalTaskNetwork
 {
@@ -31,29 +33,35 @@ namespace HierarchicalTaskNetwork
 
         }
 
-        private bool CheckEndTask()
+        private bool CheckEndTask(Lifetime lifetime)
         {
-            return BasicCheck(_endingConditions);
+            return BasicCheck(lifetime, _endingConditions);
         }
 
-        internal override async Task<TaskStatus> Execution()
+        internal override async Task<TaskStatus> Execution(Lifetime lifetime)
         {
+            Debug.Log($"{Name} started");
             Status = TaskStatus.InProgress;
-            if (!CheckPreConditions())
+            
+            if (!CheckPreConditions(lifetime))
             {
                 return TaskStatus.Failure;
             }
 
+            if (lifetime.IsNotAlive)
+            {
+                return TaskStatus.Failure;
+            }
             _taskAction.Invoke();
 
             do
             {
-                if (!CheckTaskIntegrity())
+                if (!CheckTaskIntegrity(lifetime))
                 {
                     return TaskStatus.Failure;
                 }
                 await Task.Yield();
-            } while (!CheckEndTask());
+            } while (!CheckEndTask(lifetime));
 
             return TaskStatus.Complete;
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using NPC;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;

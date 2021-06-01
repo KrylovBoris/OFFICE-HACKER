@@ -18,9 +18,13 @@ namespace NPC
 
         public TraitType type;
         [SerializeField]
+        [Range(-100f, 100f)]
         private float traitIntensity;
 
         public float Intensity => traitIntensity;
+
+        public float NormalisedIntensity => Intensity / 100;
+        
         public int GetTraitMask()
         {
             return 1 << (int)type;

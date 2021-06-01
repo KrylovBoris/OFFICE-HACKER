@@ -18,17 +18,7 @@ public class Profile : ScriptableObject
         password = newPassword;
     }
     
-    public Directory WorkSpace
-    {
-        get
-        {
-            if (_workSpace == null)
-            {
-                _workSpace = workspaceConfig.Catalogue;
-            }
-            return _workSpace;
-        }
-    }
+    public Directory WorkSpace => _workSpace ??= workspaceConfig.Catalogue;
 
     public EmailBox EmailBox
     {

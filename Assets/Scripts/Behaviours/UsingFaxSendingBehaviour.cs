@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using NPC;
 using UnityEngine;
 
 public class UsingFaxSendingBehaviour : StateMachineBehaviour
@@ -19,7 +20,7 @@ public class UsingFaxSendingBehaviour : StateMachineBehaviour
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        animator.gameObject.GetComponent<Agent.BaseAgent>().FinalizeFaxSearch();
+        animator.gameObject.GetComponent<BaseAgent>().FinalizeFaxSearch();
         animator.SetInteger("Action", 0);   
     }
 

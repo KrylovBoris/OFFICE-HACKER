@@ -1,5 +1,7 @@
-﻿using NPC;
+﻿using System;
+using NPC;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class AnimationManager : MonoBehaviour
 {
@@ -10,6 +12,7 @@ public class AnimationManager : MonoBehaviour
     [Range(0f, 1f)]
     private float maxIkStrength;
     private Transform _sightDirection;
+    private bool _isLookingAtInterlocutor = false;
     private static readonly int Vertical = Animator.StringToHash("Vertical");
     private static readonly int Horizontal = Animator.StringToHash("Horizontal");
     private static readonly int Sit = Animator.StringToHash("Sit");
@@ -19,7 +22,6 @@ public class AnimationManager : MonoBehaviour
     private static readonly int Action = Animator.StringToHash("Action");
     private static readonly int EmoteHash = Animator.StringToHash("Emote");
     private static readonly int Stop = Animator.StringToHash("Stop");
-
 
     public bool IsAnimatingAction
     {
@@ -38,6 +40,15 @@ public class AnimationManager : MonoBehaviour
         var animationVector = transform.InverseTransformDirection(movementRelativeDirection);
         _animator.SetFloat(Vertical, animationVector.z);
         _animator.SetFloat(Horizontal, animationVector.x);
+    }
+
+    public void OnAnimatorIK(int layerIndex)
+    {
+        if (_isLookingAtInterlocutor)
+        {
+            _animator.SetLookAtPosition(_sightDirection.position);
+            _animator.SetLookAtWeight(maxIkStrength);
+        }
     }
 
     public void SitDownOnChair()
@@ -85,8 +96,8 @@ public class AnimationManager : MonoBehaviour
 
     public void LookAt(Transform lookAtTransform)
     {
-        _animator.SetLookAtPosition(lookAtTransform.position);
-        _animator.SetLookAtWeight(maxIkStrength);
+        _isLookingAtInterlocutor = true;
+        _sightDirection = lookAtTransform;
     }
 
     public void EmoteAny()
@@ -99,5 +110,11 @@ public class AnimationManager : MonoBehaviour
     {
         _isAnimatingAction = true;
         _animator.SetInteger(EmoteHash, Random.Range(1, 4));
+    }
+
+    public void ResetHead()
+    {
+        _isLookingAtInterlocutor = false;
+        _sightDirection = null;
     }
 }

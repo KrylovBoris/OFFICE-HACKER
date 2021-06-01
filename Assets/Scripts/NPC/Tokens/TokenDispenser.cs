@@ -6,25 +6,24 @@ using UnityEngine;
 
 namespace NPC
 {
-    public abstract class TokenDispenser<T> : MonoBehaviour
-        where T : AiToken 
+    [RequireComponent(typeof(IWaitingZone))]
+    public abstract class TokenDispenser : MonoBehaviour
     {
         [SerializeField] private Transform[] availableSpots;
-        [SerializeField] private float waitingZoneRadius;
-
-        public Transform WaitingZone => this.transform;
-
-        public float WaitingZoneRadius => waitingZoneRadius;
+        public IWaitingZone WaitingZone => _waitingZone;
+        private IWaitingZone _waitingZone;
 
         private Queue<RequestToken> _pendingRequests;
         private Queue<Transform> _availableQueue;
         private Queue<BaseAgent> _waitingAgents;
+        
 
         private void Start()
         {
             _pendingRequests = new Queue<RequestToken>();
             _availableQueue = new Queue<Transform>(availableSpots);
             _waitingAgents = new Queue<BaseAgent>();
+            _waitingZone = GetComponent<IWaitingZone>();
         }
 
         private void Update()

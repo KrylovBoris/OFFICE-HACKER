@@ -1005,7 +1005,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2189307995463816873}
   - component: {fileID: 8136878369382841299}
-  - component: {fileID: 6902923487861231704}
   - component: {fileID: 8972238574803316010}
   - component: {fileID: 186873770757813405}
   - component: {fileID: 3594433045156170468}
@@ -1057,27 +1056,6 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &6902923487861231704
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2898811680150381754}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c94e1c525bb6054daf24f0b6f51a25d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  personName: Leonardo de Vincent
-  passwordTypingTime: 8
-  traitArray:
-  - type: 2
-    traitIntensity: 15
-  - type: 5
-    traitIntensity: -55
-  - type: 1
-    traitIntensity: 15
 --- !u!114 &8972238574803316010
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1090,11 +1068,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 897f0ebc2219c9642ac40e59b3926d50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  standardStoppingDistance: 0.05
   workingPlace: {fileID: 0}
   department: {fileID: 0}
-  standardStoppingDistance: 0.05
+  _personality: {fileID: 11400000, guid: c7f21f8b9468ba54995428197e1a99af, type: 2}
   minWaitTime: 0
-  maxWaitTime: 0
+  maxWaitTime: 1
+  head: {fileID: 1475554747484949463}
 --- !u!114 &186873770757813405
 MonoBehaviour:
   m_ObjectHideFlags: 0

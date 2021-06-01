@@ -2352,7 +2352,6 @@ GameObject:
   - component: {fileID: 7289587261873028127}
   - component: {fileID: 7289587261873028126}
   - component: {fileID: 7289587261873028124}
-  - component: {fileID: 7289587261873028115}
   m_Layer: 0
   m_Name: MalcolmMalcom
   m_TagString: Untagged
@@ -2436,11 +2435,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 897f0ebc2219c9642ac40e59b3926d50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  standardStoppingDistance: 0.05
   workingPlace: {fileID: 0}
   department: {fileID: 0}
-  standardStoppingDistance: 0.05
+  _personality: {fileID: 11400000, guid: eaf8fb54335456b4bac5656aae89a9e5, type: 2}
   minWaitTime: 0
-  maxWaitTime: 0
+  maxWaitTime: 1
+  head: {fileID: 4572754830882875645}
 --- !u!114 &7289587261873028124
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2454,27 +2455,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxIkStrength: 0
---- !u!114 &7289587261873028115
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7289587261873028121}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c94e1c525bb6054daf24f0b6f51a25d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  personName: Malcom Malcom
-  passwordTypingTime: 5
-  traitArray:
-  - type: 2
-    traitIntensity: -50
-  - type: 5
-    traitIntensity: 50
-  - type: 3
-    traitIntensity: 100
 --- !u!1 &7382302619501386880
 GameObject:
   m_ObjectHideFlags: 0

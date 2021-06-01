@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using NPC;
+using UnityEngine;
 
 public class DialogueController : MonoBehaviour
 {

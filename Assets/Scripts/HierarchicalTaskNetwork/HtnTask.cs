@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Threading.Tasks;
+using JetBrains.Lifetimes;
+using UnityEngine;
 
 namespace HierarchicalTaskNetwork
 {
@@ -78,8 +80,13 @@ namespace HierarchicalTaskNetwork
 
         #region Checks
 
-        protected bool BasicCheck(Condition[] collection)
+        protected bool BasicCheck(Lifetime lifetime, Condition[] collection)
         {
+            if (lifetime.IsNotAlive)
+            {
+                return false;
+            }
+            
             var result = true;
             try
             {
@@ -90,9 +97,9 @@ namespace HierarchicalTaskNetwork
                     if (!result) return false;
                 }
             }
-            catch (NullReferenceException e)
+            catch (Exception e)
             {
-                Console.WriteLine(e);
+                Debug.LogError(e);
                 throw;
             }
 
@@ -100,28 +107,28 @@ namespace HierarchicalTaskNetwork
         }
 
 
-        protected bool CheckPreConditions()
+        protected bool CheckPreConditions(Lifetime lifetime)
         {
-            return BasicCheck(_preConditionsList);
+            return BasicCheck(lifetime, _preConditionsList);
         }
 
-        protected bool CheckTaskIntegrity()
+        protected bool CheckTaskIntegrity(Lifetime lifetime)
         {
-            return BasicCheck(_integrityRules);
+            return BasicCheck(lifetime, _integrityRules);
         }
 
         #endregion
 
 
-        internal virtual async Task<TaskStatus> Execution()
+        internal virtual async Task<TaskStatus> Execution(Lifetime lifetime)
         {
             return TaskStatus.Complete;
         }
 
-        public async void StartExecution()
+        public async void StartExecution(Lifetime lf)
         {
             UnityEngine.Debug.Log($"Starting task {Name}");
-            Status = await Execution();
+            Status = await Execution(lf);
             UnityEngine.Debug.Log($"Task {Name} finished");
         }
 

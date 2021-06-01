@@ -2,7 +2,7 @@ using Agent;
 
 namespace NPC
 {
-    public class ArchiveTokenDispenser : TokenDispenser<ArchiveSearchToken>
+    public class ArchiveTokenDispenser : TokenDispenser
     {
         public override AiToken RequestToken()
         {

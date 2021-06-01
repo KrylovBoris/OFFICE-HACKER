@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using NPC;
+using UnityEngine;
 using UnityEngine.Assertions;
 public class Computer : MonoBehaviour
 {

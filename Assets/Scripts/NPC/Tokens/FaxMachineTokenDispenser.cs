@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace NPC
 {
-    public class FaxMachineTokenDispenser : TokenDispenser<FaxMachineToken>
+    public class FaxMachineTokenDispenser : TokenDispenser
     {
         public override AiToken RequestToken()
         {

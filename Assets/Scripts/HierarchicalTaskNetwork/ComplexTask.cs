@@ -1,8 +1,11 @@
 
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Lifetimes;
+using UnityEngine;
 
 namespace HierarchicalTaskNetwork
 {
@@ -30,37 +33,45 @@ namespace HierarchicalTaskNetwork
             return _decompose.Invoke();
         }
 
-        internal override async Task<TaskStatus> Execution()
+        internal override async Task<TaskStatus> Execution(Lifetime lifetime)
         {
             Status = TaskStatus.InProgress;
-            if (!CheckPreConditions())
+
+            if (!CheckPreConditions(lifetime))
             {
                 return TaskStatus.Failure;
             }
 
             _taskExecutionPlan = new Queue<HtnTask>(DecomposeTask());
 
-            var planStatus = await ExecutePlan();
+            var planStatus = await ExecutePlan(lifetime.CreateNested().Lifetime);
             
             return planStatus;
         }
 
-        private async Task<TaskStatus> ExecutePlan()
+        private async Task<TaskStatus> ExecutePlan(Lifetime lifetime)
         {
+            Debug.Log($"{Name} started");
             while (_taskExecutionPlan.Any())
             {
-                if (!CheckTaskIntegrity())
+                if (!CheckTaskIntegrity(lifetime))
                 {
                     return TaskStatus.Failure;
                 }
                 
                 _currentHtnTask = _taskExecutionPlan.Dequeue();
-                
-                var status = await _currentHtnTask.Execution();
-                
-                if (status == TaskStatus.Failure)
+                try
                 {
-                    return TaskStatus.Failure;
+                    var status = await _currentHtnTask.Execution(lifetime);
+                    if (status == TaskStatus.Failure)
+                    {
+                        return TaskStatus.Failure;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{Name} has failed!");
+                    throw;
                 }
             }
             return TaskStatus.Complete;

@@ -2701,7 +2701,6 @@ GameObject:
   - component: {fileID: 2508002910723919239}
   - component: {fileID: 6547511783175327949}
   - component: {fileID: 4518180788889913198}
-  - component: {fileID: 3167334873086569518}
   - component: {fileID: 3250538592732843949}
   m_Layer: 0
   m_Name: Rupert
@@ -2786,32 +2785,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 897f0ebc2219c9642ac40e59b3926d50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  standardStoppingDistance: 0.05
   workingPlace: {fileID: 0}
   department: {fileID: 0}
-  standardStoppingDistance: 0.05
+  _personality: {fileID: 11400000, guid: 3edf8f2285f4e4d43a0ddbc38aa1d4b8, type: 2}
   minWaitTime: 0
-  maxWaitTime: 0
---- !u!114 &3167334873086569518
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8799872330308915950}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c94e1c525bb6054daf24f0b6f51a25d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  personName: Rupert Dupert
-  passwordTypingTime: 5.5
-  traitArray:
-  - type: 2
-    traitIntensity: -18
-  - type: 5
-    traitIntensity: -55
-  - type: 1
-    traitIntensity: 15
+  maxWaitTime: 1
+  head: {fileID: 0}
 --- !u!114 &3250538592732843949
 MonoBehaviour:
   m_ObjectHideFlags: 0

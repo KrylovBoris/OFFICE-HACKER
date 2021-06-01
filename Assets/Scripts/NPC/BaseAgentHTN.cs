@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using Agent;
 using GlobalMechanics;
 using HierarchicalTaskNetwork;
 using JetBrains.Collections.Viewable;
-using NPC;
-using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Agent
+namespace NPC
 {
     public partial class BaseAgent
     {
@@ -21,13 +19,13 @@ namespace Agent
             
             public void GoToArchives()
             {
-                _navMeshDestination = _activeArchiveZone.WaitingZone;
-                _navMeshAgent.stoppingDistance = _activeArchiveZone.WaitingZoneRadius;
+                _navMeshDestination = _activeZone.transform;
+                _navMeshAgent.stoppingDistance = _activeZone.WaitingZone.Radius;
                 _navMeshAgent.SetDestination(GetDestination());
-                CoroutineUtils.ConditionedAction(IsNearDestination, () =>
+                StartCoroutine(CoroutineUtils.ConditionedAction(IsNearDestination, () =>
                 {
-                    _activeArchiveZone.PlaceWaitingAgent(this);
-                });
+                    AddAgentToZone(this);
+                }));
             }
 	        public void TurnOnPC() => workingPlace.computer.TurnOn();
             public void TurnOffPC() => workingPlace.computer.TurnOff();
@@ -85,8 +83,11 @@ namespace Agent
             {
                 HasToWaitTimer = true;
                 StartCoroutine(CoroutineUtils.DelayedAction(
-                    UnityEngine.Random.Range(minWaitTime, maxWaitTime),
-                    () => { HasToWaitTimer = false;}));
+                    UnityEngine.Random.Range((float) minWaitTime, maxWaitTime),
+                    () =>
+                    {
+                        HasToWaitTimer = false;
+                    }));
             }
 	        public void CheckMail()
             {
@@ -101,8 +102,8 @@ namespace Agent
             }
 	        public void RequestArchiveToken()
             {
-                _activeArchiveZone = department.GetRandomArchiveNavMeshDestination();
-                _activeToken = _activeArchiveZone.RequestToken();
+                SetRandomActiveArchiveZone();
+                _activeToken = _activeZone.RequestToken();
                 _activeToken.Accept();
                 if (_activeToken is RequestToken requestToken)
                 {
@@ -130,7 +131,7 @@ namespace Agent
             }
 	        public void InitTalk()
             {
-                _animationManager.LookAt(_currentConversation.GetInterlocutor(this).Head);
+                _animationManager.LookAt(_currentConversation.GetSpeaker().Head);
             }
 	        public void WaitPlayerResponse()
             {
@@ -138,8 +139,8 @@ namespace Agent
             }
 	        public void RequestFaxToken()
             {
-                _activeFaxZone = department.GetRandomFaxMachineDestination();
-                _activeToken = _activeFaxZone.RequestToken();
+                SetRandomActiveFaxZone();
+                _activeToken = _activeZone.RequestToken();
                 _activeToken.Accept();
                 if (_activeToken is RequestToken requestToken)
                 {
@@ -157,8 +158,8 @@ namespace Agent
             }
 	        public void GoToPrinter()
             {
-                _navMeshDestination = _activeFaxZone.WaitingZone;
-                _navMeshAgent.stoppingDistance = _activeFaxZone.WaitingZoneRadius;
+                _navMeshDestination = _activeZone.transform;
+                _navMeshAgent.stoppingDistance = _activeZone.WaitingZone.Radius;
                 _navMeshAgent.SetDestination(GetDestination());
             }
             
@@ -183,6 +184,7 @@ namespace Agent
             }
             private void EndConversation()
             {
+                _animationManager.ResetHead();
                 _currentConversation.Stop();
             }
 	        public void Abort()
@@ -208,7 +210,10 @@ namespace Agent
 
             public void WaitForInterlocutor()
             {
-                
+                StartCoroutine(CoroutineUtils.ConditionedAction(InterlocutorFound, () =>
+                {
+                    _currentConversation = WaitingZone.GetConversation(this);
+                }));
             }
 	        public void WalkToKitchen()
             {
@@ -339,7 +344,7 @@ namespace Agent
             }
 	        public bool InterlocutorFound()
             {
-                return _currentConversation != null;
+                return WaitingZone.HasConversation(this);
             }
 	        public bool CanChat()
             {
@@ -1389,11 +1394,7 @@ namespace Agent
             if(IsComputerOn()) {
                 tasks.Add(CreateTurnOffPC());
             }
-
-            if (IsFacingComputer())
-            {
-                tasks.Add(CreateTurnFromComputer());
-            }
+            
             if(IsSitting()) {
                 tasks.Add(CreateStand());
             }
@@ -1566,7 +1567,7 @@ namespace Agent
         {
             HtnTask.Condition[] preConditions = 
             { 
-                () => CanChat(),  
+                //() => CanChat(),  
             };
         
             HtnTask.Condition[] integrityRules = 
@@ -1604,7 +1605,7 @@ namespace Agent
         {
             HtnTask.Condition[] preConditions = 
             { 
-                () => CanChat(),  
+                //() => CanChat(),  
             };
         
             HtnTask.Condition[] integrityRules = HtnTask.EmptyCondition;

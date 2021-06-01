@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Global_Mechanics;
+using NPC;
 using UnityEngine;
 
 

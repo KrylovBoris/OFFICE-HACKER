@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Agent;
 using UnityEngine;
 using HierarchicalTaskNetwork;
+using JetBrains.Lifetimes;
+using BaseAgent = NPC.BaseAgent;
 
 public class HTN_planner : MonoBehaviour
 {
+    private LifetimeDefinition _lifetime;
     
     public BaseAgent[] agents;
     public GameObject player;
@@ -29,9 +33,14 @@ public class HTN_planner : MonoBehaviour
     
     
     // Start is called before the first frame update
-    void Awake()
+    private void OnEnable()
     {
+        _lifetime = Lifetime.Eternal.CreateNested();
+    }
 
+    private void OnDisable()
+    {
+        _lifetime.Terminate();
     }
 
 
@@ -113,7 +122,7 @@ public class HTN_planner : MonoBehaviour
         foreach (var t in _idToTask.Values)
         {
             if (t.Status != HtnTask.TaskStatus.InProgress )
-                t.StartExecution();
+                t.StartExecution(_lifetime.Lifetime);
             //Debug.Log(t.Name + t.Status);
         }
 

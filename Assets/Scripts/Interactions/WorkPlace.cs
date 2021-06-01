@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Interactions;
+using NPC;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 public class WorkPlace : MonoBehaviour

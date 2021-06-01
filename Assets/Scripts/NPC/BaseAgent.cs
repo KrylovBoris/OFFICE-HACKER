@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using Agent;
+using HierarchicalTaskNetwork;
 using UnityEngine;
 using UnityEngine.AI;
-using HierarchicalTaskNetwork;
-using NPC;
 
-namespace Agent
+namespace NPC
 {
     public partial class BaseAgent : MonoBehaviour
     {
+        [SerializeField]
+        private float standardStoppingDistance = 0.05f;
+        
+        
         private uint _id;
         private static uint _agentsCount;
         protected HTN_planner HtnPlanner;
@@ -18,21 +21,19 @@ namespace Agent
         public WorkPlace workingPlace;
         public Department department;
         
-        [SerializeField]
-        private float standardStoppingDistance = 0.05f;
-
         public delegate HtnTask TaskCreationProcedure();
         protected Dictionary<string, TaskCreationProcedure> AgentTaskDictionary;
         private float _waitTimer = 0f;
         private Transform _navMeshDestination;
         
         private AiToken _activeToken;
-        private ArchiveTokenDispenser _activeArchiveZone;
-        private FaxMachineTokenDispenser _activeFaxZone;
-
+        
+        private TokenDispenser _activeZone;
+        private IWaitingZone WaitingZone => _activeZone.WaitingZone;
+        
         private NavMeshAgent _navMeshAgent;
         private AnimationManager _animationManager;
-        private Personality _personality;
+        [SerializeField]private Personality _personality;
 
         private InterruptionFlagsHandler _handler;
         public InterruptionFlagsHandler Handler => _handler;
@@ -47,13 +48,18 @@ namespace Agent
         private bool _hasToStop;
         [SerializeField] private float minWaitTime;
         [SerializeField] private float maxWaitTime;
+        
         private Conversation _currentConversation;
+        
+        public uint ID => _id;
+        public bool IsOccupied => 
+            _isTyping || _isTalking || IsSearchingArchives() || _isSitting;
 
-        public bool IsOccupied
-        {
-            get { return _isTyping || _isTalking || IsSearchingArchives() || _isSitting; }
-        }
+        [SerializeField]
+        private Transform head;
 
+        public Personality Personality => _personality;
+        public Transform Head => head;
 
         // Start is called before the first frame update
         protected void Awake()
@@ -65,7 +71,6 @@ namespace Agent
 
         void Start()
         {
-            _personality = GetComponent<Personality>();
             _navMeshAgent = GetComponent<NavMeshAgent>();
             _animationManager = GetComponent<AnimationManager>();
             
@@ -75,8 +80,6 @@ namespace Agent
                 workingPlace.SpawnExternalNote(_personality.NoteText());
             }
         }
-
-        public uint ID => _id;
 
         // Update is called once per frame
         void Update()
@@ -126,7 +129,7 @@ namespace Agent
         public void FinalizeArchiveSearch()
         {
             _navMeshAgent.enabled = true;
-            _activeArchiveZone = null;
+            _activeZone = null;
             _activeToken.Finish();
             _activeToken = null;
         }
@@ -134,12 +137,28 @@ namespace Agent
         public void FinalizeFaxSearch()
         {
             _navMeshAgent.enabled = true;
-            _activeFaxZone = null;
+            _activeZone = null;
             _activeToken.Finish();
             _activeToken = null;
         }
 
-        public Vector3 GetDestination()
+        private void SetRandomActiveArchiveZone()
+        {
+            _activeZone = (TokenDispenser) department.GetRandomArchiveNavMeshDestination();
+        }
+
+        private void SetRandomActiveFaxZone()
+        {
+            _activeZone = department.GetRandomFaxMachineDestination();
+        }
+
+        private void AddAgentToZone(BaseAgent agent)
+        {
+            _activeZone.PlaceWaitingAgent(agent);
+            WaitingZone.AddInterlocutorCandidate(agent);
+        }
+
+        private Vector3 GetDestination()
         {
             return _navMeshDestination.position;
         }

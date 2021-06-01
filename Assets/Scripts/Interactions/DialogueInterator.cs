@@ -1,4 +1,5 @@
 ﻿using Agent;
+using NPC;
 using UnityEngine;
 
 public class DialogueInterator : MonoBehaviour, IInteractable

@@ -1,5 +1,6 @@
 ﻿using System;
 using JetBrains.Lifetimes;
+using NPC;
 using UnityEngine;
 using Player;
 
@@ -64,8 +65,7 @@ public class GameManager : MonoBehaviour
     public bool IsLookingAtSmartPhone => currentGameMod == GameMode.Computer;
     public Lifetime ProjectLifetime => Lifetime.Eternal;
 
-    [SerializeField]
-    
+
     private void Awake()
     {
         if (gm == null) gm = this;
