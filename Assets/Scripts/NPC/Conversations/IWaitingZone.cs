@@ -10,5 +10,6 @@ namespace NPC
         void AddInterlocutorCandidate(BaseAgent interlocutor);
         Conversation GetConversation(BaseAgent interlocutor);
         bool HasConversation(BaseAgent baseAgent);
+        void RemoveAgent(BaseAgent agent);
     }
 }

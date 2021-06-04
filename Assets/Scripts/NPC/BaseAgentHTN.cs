@@ -92,6 +92,7 @@ namespace NPC
             }
 	        public void CheckMail()
             {
+                _hasToWorkOnPc = false;
                 workingPlace.computer.CheckAllMail(_personality);
             }
 	        public void StandUp()
@@ -112,11 +113,13 @@ namespace NPC
                     {
                         _activeToken = token;
                         token.Accept();
+                        WaitingZone.RemoveAgent(this);
                         _navMeshDestination = ((ArchiveSearchToken) _activeToken).SearchingSpot;
                     });
                 }
                 else
                 {
+                    WaitingZone.RemoveAgent(this);
                     _navMeshDestination = ((ArchiveSearchToken) _activeToken).SearchingSpot;
                 }
             }
@@ -147,13 +150,16 @@ namespace NPC
                 {
                     requestToken.RequestedTokenSignal.AdviseOnce(GameManager.gm.ProjectLifetime, token =>
                     {
+                        
                         _activeToken = token;
                         token.Accept();
+                        WaitingZone.RemoveAgent(this);
                         _navMeshDestination = ((FaxMachineToken) _activeToken).SearchingSpot;
                     });
                 }
                 else
                 {
+                    WaitingZone.RemoveAgent(this);
                     _navMeshDestination = ((FaxMachineToken) _activeToken).SearchingSpot;
                 }
             }
@@ -162,6 +168,11 @@ namespace NPC
                 _navMeshDestination = _activeZone.transform;
                 _navMeshAgent.stoppingDistance = _activeZone.WaitingZone.Radius;
                 _navMeshAgent.SetDestination(GetDestination());
+                StartCoroutine(CoroutineUtils.ConditionedAction(IsNearDestination, () =>
+                {
+                    if (!HasRequestedToken())
+                        AddAgentToZone(this);
+                }));
             }
             
 	        public void AdjustPosition()
@@ -186,7 +197,7 @@ namespace NPC
             private void EndConversation()
             {
                 _animationManager.ResetHead();
-                _currentConversation.Stop();
+                WaitingZone.RemoveAgent(this);
             }
 	        public void Abort()
             {
@@ -200,20 +211,19 @@ namespace NPC
             {
                 throw new NotImplementedException();
             }
-	        public void WaitNPCResponse()
+            public void TalkToNpc()
             {
-                _currentConversation.RequestLine();
-            }
-	        public void TalkToNPC()
-            {
+                _currentConversation.SpeakerStarted(this);
                 _animationManager.SayLine();
             }
 
             public void WaitForInterlocutor()
             {
-                StartCoroutine(CoroutineUtils.ConditionedAction(InterlocutorFound, () =>
+                StartCoroutine(CoroutineUtils.ConditionedAction(() => HasToStopChat() || InterlocutorFound(), () =>
                 {
-                    _currentConversation = WaitingZone.GetConversation(this);
+                    // if (HasToStopChat()) 
+                    //     return;
+                    // _currentConversation = WaitingZone.GetConversation(this);
                 }));
             }
 	        public void WalkToKitchen()
@@ -263,17 +273,14 @@ namespace NPC
             {
                 return IsAgentInPosition(workingPlace.navMeshDestination.position);
             }
-            
-	        public bool IsWorking()
+            public bool WillWorkOnPC()
             {
-                var res = true;
-                throw new NotImplementedException();
-                return res;
-            }
-	        public bool WillWorkOnPC()
-            {
-                var res = Random.Range(0, 100) < 50;
+                var res = Random.Range(0, 100) < 0;
                 //TODO: Personality-based choice
+                if (_hasToWorkOnPc)
+                {
+                    res = true;
+                }
                 return res;
             }
 	        public bool CanAnimate() => !_animationManager.IsAnimatingAction;
@@ -300,21 +307,22 @@ namespace NPC
 
             public bool HasRequestedToken() =>
                 !(_activeToken is RequestToken) && _activeToken.Status == TokenStatus.InProgress;
-            
-            public bool WillChatNPC()
+
+            private bool MakeDecision(string key)
             {
-                var res = true;
-                //TODO Personality check
-                return res;
+                return new RandomEvent(()=>_personality.GetProbability(key)).HasEventHappened();
             }
-	        public bool WillEmote()
+
+            public bool WillChatNpc() => MakeDecision("Chat");
+            
+            public bool WillEmote()
             {
                 var res = Random.Range(0, 1.0f) > 0.25;
                 return res;
             }
 	        public bool WillSearchArchives()
             {
-                var res = Random.Range(0, 100) < 50;
+                var res = Random.Range(0, 100) < 101;
                 //TODO: Personality-based choice
                 return res;
             }
@@ -325,13 +333,9 @@ namespace NPC
             {
                 return _currentConversation.GetSpeaker() == this;
             }
-	        public bool WillTalk()
-            {
-                var res = true;
-                throw new NotImplementedException();
-                return res;
-            }
-	        public bool WillApprove()
+	        public bool WillTalk() => MakeDecision("Chat");
+            
+            public bool WillApprove()
             {
                 var res = true;
                 throw new NotImplementedException();
@@ -357,24 +361,11 @@ namespace NPC
                 return _currentConversation != null;
             }
             
-	        public bool WillGoToBreakRoom()
-            {
-                var res = true;
-                throw new NotImplementedException();
-                return res;
-            }
-	        public bool WillSpeakWithFriend()
-            {
-                var res = true;
-                throw new NotImplementedException();
-                return res;
-            }
-	        public bool WillGoToKitchen()
-            {
-                var res = true;
-                throw new NotImplementedException();
-                return res;
-            }
+	        public bool WillGoToBreakRoom() => MakeDecision("BreakRoom");
+
+            public bool WillSpeakWithFriend() => MakeDecision("SpeakFriend");
+
+            public bool WillGoToKitchen() => MakeDecision("Kitchen");
 
             public bool CanSit()
             {
@@ -384,15 +375,13 @@ namespace NPC
             }
 	        public bool HasUSB()
             {
-                var res = true;
+                var res = false;
                 //TODO USB pickup check;
                 return res;
             }
-	        public bool WillPlugUsb()
-            {
-                return new RandomEvent(_personality.UsbAttackProbability).HasEventHappened();
-            }
-            
+
+            public bool WillPlugUsb() => MakeDecision("UsbAttack");
+
             private bool HasNpcResponse()
             {
                 return _currentConversation.HasRequestedLine(this);
@@ -1049,9 +1038,12 @@ namespace NPC
 
             var integrityRules = HtnTask.EmptyCondition;
 
-            var finishConditions = HtnTask.EmptyCondition;
+            HtnTask.Condition[] finishConditions =
+            {
+                () => !_animationManager.IsSpeaking.Value
+            };
 
-            SimpleTask.TaskAction action = TalkToNPC;
+            SimpleTask.TaskAction action = TalkToNpc;
 
             var task = new SimpleTask(
                 name + "NPCLine",
@@ -1242,7 +1234,7 @@ namespace NPC
         {
             HtnTask.Condition[] preConditions =
             {
-                () => HasUSB()
+                HasConversation
             };
 
             var integrityRules = HtnTask.EmptyCondition;
@@ -1522,7 +1514,7 @@ namespace NPC
             if(HasRequestedToken()) {
             }
             else {
-                if(WillChatNPC()) {
+                if(WillChatNpc()) {
                     tasks.Add(CreateInitiateTalkNPC());
                 }
                 else {
@@ -1538,7 +1530,7 @@ namespace NPC
             return tasks.ToArray();
         }
 
-	    public ComplexTask CreateFaxRoutine()
+        public ComplexTask CreateFaxRoutine()
         {
             HtnTask.Condition[] preConditions = HtnTask.EmptyCondition;
         
@@ -1692,10 +1684,7 @@ namespace NPC
         public HtnTask[] DecomposeChattingNPC()
         {
             var tasks = new List<HtnTask>();
-            
-            tasks.Add(CreateWaitNPCLine());
-            tasks.Add(CreateEmote());
-            
+
             if(HasToStopChat()) {
                 tasks.Add(CreateEndConversation());
             }
@@ -1703,6 +1692,11 @@ namespace NPC
                 if (CanSpeak())
                 {
                     tasks.Add(CreateNPCLine());
+                }
+                else
+                {
+                    tasks.Add(CreateWaitNPCLine());
+                    tasks.Add(CreateEmote());
                 }
                 
                 tasks.Add(CreateChattingNPC());
@@ -1853,5 +1847,10 @@ namespace NPC
         }
 
         #endregion
+
+        public void StopTalking()
+        {
+            _animationManager.StopTalking();
+        }
     }
 }

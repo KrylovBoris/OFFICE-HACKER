@@ -24,6 +24,7 @@ public class AnimationManager : MonoBehaviour
     private static readonly int EmoteHash = Animator.StringToHash("Emote");
     private static readonly int SpeakHash = Animator.StringToHash("Talking");
     private static readonly int Stop = Animator.StringToHash("Stop");
+    private static readonly int StopTalking1 = Animator.StringToHash("StopTalking");
 
     public bool IsAnimatingAction
     {
@@ -98,10 +99,10 @@ public class AnimationManager : MonoBehaviour
         _animator.SetTrigger(Stop);
     }
 
-    public void LookAt(ISightController lookAtTransform)
+    public void LookAt(ISightController lookAt)
     {
         _isLookingAtInterlocutor = true;
-        _sightController = lookAtTransform;
+        _sightController = lookAt;
     }
 
     public void EmoteAny()
@@ -112,7 +113,7 @@ public class AnimationManager : MonoBehaviour
 
     public void SayLine()
     {
-        _isAnimatingAction = true;
+        IsSpeaking.Value = true;
         _animator.SetInteger(SpeakHash, Random.Range(1, 4));
     }
 
@@ -124,7 +125,11 @@ public class AnimationManager : MonoBehaviour
 
     public void StopSpeaking()
     {
-        IsSpeaking.Value = true;
+        IsSpeaking.Value = false;
     }
 
+    public void StopTalking()
+    {
+        _animator.SetTrigger(StopTalking1);
+    }
 }

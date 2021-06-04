@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e9a0fcaee3d43899eb655528c448130, type: 3}
+  m_Name: ProbabilityMatrix
+  m_EditorClassIdentifier: 
+  matrix:
+  - key: Chat
+    Curiosity: 0.4
+    Negligence: 0
+    TechnicalKnowledge: 0
+    WillingnessToHelp: 0.19999999
+    Fearfulness: 0
+    Greed: 0
+    Trust: 0.4
+  - key: ConversationJoin
+    Curiosity: 0.4
+    Negligence: 0
+    TechnicalKnowledge: 0
+    WillingnessToHelp: 0.19999999
+    Fearfulness: 0
+    Greed: 0
+    Trust: 0.4
+  - key: NoteLost
+    Curiosity: 0
+    Negligence: 0.7
+    TechnicalKnowledge: 0.3
+    WillingnessToHelp: 0
+    Fearfulness: 0
+    Greed: 0
+    Trust: 0
+  - key: Line
+    Curiosity: -0.5
+    Negligence: 0.3
+    TechnicalKnowledge: 0.3
+    WillingnessToHelp: 0.3
+    Fearfulness: -0.5
+    Greed: 0.3
+    Trust: 0.79999995
+  - key: UsbAttack
+    Curiosity: 0.5
+    Negligence: 0.5
+    TechnicalKnowledge: 0
+    WillingnessToHelp: 0
+    Fearfulness: 0
+    Greed: 0
+    Trust: 0
+  - key: SpeakFriend
+    Curiosity: 0.33
+    Negligence: 0
+    TechnicalKnowledge: 0
+    WillingnessToHelp: 0.33
+    Fearfulness: 0
+    Greed: 0
+    Trust: 0.33
+  - key: BreakRoom
+    Curiosity: 0.5
+    Negligence: 0.2
+    TechnicalKnowledge: 0.2
+    WillingnessToHelp: 0.4
+    Fearfulness: -1
+    Greed: 0.19999999
+    Trust: 0.5
+  - key: Kitchen
+    Curiosity: 0
+    Negligence: 0
+    TechnicalKnowledge: 0
+    WillingnessToHelp: 0
+    Fearfulness: 1
+    Greed: 0
+    Trust: -1

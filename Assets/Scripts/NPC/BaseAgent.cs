@@ -5,6 +5,7 @@ using Agent;
 using HierarchicalTaskNetwork;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Assertions;
 
 namespace NPC
 {
@@ -36,7 +37,22 @@ namespace NPC
         private AiToken _activeToken;
         
         private TokenDispenser _activeZone;
-        private IWaitingZone WaitingZone => _activeZone.WaitingZone;
+
+        private IWaitingZone WaitingZone
+        {
+            get
+            {
+                try
+                {
+                    Assert.IsNotNull(_activeZone, $"{name} has no active zone");
+                    return _activeZone.WaitingZone;
+                }
+                catch (Exception e)
+                {
+                    throw;
+                }
+            }
+        }
         
         private NavMeshAgent _navMeshAgent;
         private AnimationManager _animationManager;
@@ -65,6 +81,8 @@ namespace NPC
         [SerializeField]
         private Transform head;
 
+        private bool _hasToWorkOnPc;
+
         // Start is called before the first frame update
         protected void Awake()
         {
@@ -78,7 +96,7 @@ namespace NPC
             _navMeshAgent = GetComponent<NavMeshAgent>();
             _animationManager = GetComponent<AnimationManager>();
             
-            var noteForgottenEvent = new RandomEvent(() => _personality.NoteLostProbability());
+            var noteForgottenEvent = new RandomEvent(() => _personality.GetProbability("NoteLost"));
             if (noteForgottenEvent.HasEventHappened())
             {
                 workingPlace.SpawnExternalNote(_personality.NoteText());
@@ -136,6 +154,7 @@ namespace NPC
             _activeZone = null;
             _activeToken.Finish();
             _activeToken = null;
+            _hasToWorkOnPc = true;
         }
 
         public void FinalizeFaxSearch()
@@ -144,11 +163,12 @@ namespace NPC
             _activeZone = null;
             _activeToken.Finish();
             _activeToken = null;
+            _hasToWorkOnPc = true;
         }
 
         private void SetRandomActiveArchiveZone()
         {
-            _activeZone = (TokenDispenser) department.GetRandomArchiveNavMeshDestination();
+            _activeZone = department.GetRandomArchiveNavMeshDestination();
         }
 
         private void SetRandomActiveFaxZone()

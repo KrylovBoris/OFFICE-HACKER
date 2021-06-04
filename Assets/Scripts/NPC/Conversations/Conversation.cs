@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Agent;
+using GlobalMechanics;
 using JetBrains.Collections.Viewable;
 using JetBrains.Lifetimes;
 using UnityEngine;
@@ -25,6 +26,8 @@ namespace NPC
             _speakerIndex = speaker;
             _interlocutors = new List<BaseAgent>(){first, second};
             _conversationLifetime = Lifetime.Eternal.CreateNested();
+            first.SetConversation(this);
+            second.SetConversation(this);
         }
 
         public BaseAgent GetSpeaker()
@@ -55,17 +58,20 @@ namespace NPC
         {
             SpeakerSpeaking = false;
             _hasSpeakerFinished = true;
-            var speakerProbabilities = Interlocutors.
-                Where(a => a != agent).
-                Select(i => i.Personality.LineProbability())
-                .OrderByDescending(f => f).ToArray();
-            for (var i =0; i < speakerProbabilities.Count(); i++)
+            FindNewSpeaker(agent);
+        }
+
+        private void FindNewSpeaker(BaseAgent previousSpeaker)
+        {
+            var speakerProbabilities = Interlocutors.Where(a => a != previousSpeaker).Select(i => (i, i.Personality.GetProbability("Line")))
+                .OrderByDescending(f => f.Item2).ToArray();
+            for (var i = 0; i < speakerProbabilities.Count(); i++)
             {
-                var probability = speakerProbabilities[i];
+                var probability = speakerProbabilities[i].Item2;
                 var e = new RandomEvent(() => probability);
                 if (e.HasEventHappened())
                 {
-                    _speakerIndex = i;
+                    _speakerIndex = _interlocutors.IndexOf(speakerProbabilities[i].Item1);
                 }
             }
         }
@@ -75,21 +81,21 @@ namespace NPC
             return baseAgent == GetSpeaker() || _hasSpeakerFinished;
         }
 
-        public void Stop()
-        {
-            foreach (var i in _interlocutors)
-            {
-                i.DestroyConversation();
-            }
-        }
-
         public void Add(BaseAgent newSpeaker)
         {
             _interlocutors.Add(newSpeaker);
+            newSpeaker.SetConversation(this);
         }
 
         public void Remove(BaseAgent speaker)
         {
+            if (GetSpeaker() == speaker)
+            {
+                if (SpeakerSpeaking)
+                {
+                    speaker.StopTalking();
+                }
+            }
             _interlocutors.Remove(speaker);
         }
 

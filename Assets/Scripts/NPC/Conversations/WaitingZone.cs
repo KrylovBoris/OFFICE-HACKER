@@ -76,6 +76,9 @@ namespace NPC
             {
                 var conversation =
                     new Conversation(Random.Range(0, 1), interlocutors.First(), interlocutors.Last());
+                _candidates.Remove(interlocutors.First());
+                _candidates.Remove(interlocutors.Last());
+                
                 foreach (var candidate in _candidates)
                 {
                     var joiningEvent = new RandomEvent(
@@ -89,10 +92,11 @@ namespace NPC
                     foreach (var agent in conversation.Interlocutors)
                     {
                         _activeConversations.Add(agent, conversation);
+                        //agent.SetConversation(conversation);
                     }
-                    _candidates.RemoveWhere(agent => 
-                        conversation.Interlocutors.Contains(agent));
                 }
+                _candidates.RemoveWhere(agent => 
+                    conversation.Interlocutors.Contains(agent));
             }
             
         }
@@ -107,6 +111,18 @@ namespace NPC
         public bool HasConversation(BaseAgent baseAgent)
         {
             return _activeConversations.ContainsKey(baseAgent);
+        }
+
+        public void RemoveAgent(BaseAgent agent)
+        {
+            if (_activeConversations.ContainsKey(agent))
+            {
+                _activeConversations[agent].Remove(agent);
+                _activeConversations.Remove(agent);
+                return;
+            }
+
+            _candidates.Remove(agent);
         }
     }
 }

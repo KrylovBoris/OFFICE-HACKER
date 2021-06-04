@@ -19,6 +19,21 @@ namespace NPC
         private Dictionary<PersonalityTrait.TraitType, PersonalityTrait> _traitTypeToTrait;
         private Dictionary<Personality, Relationship> _personToRelationship;
 
+
+        private static ProbabilityData _ourProbabilityData;
+        public static ProbabilityData OurProbabilityData
+        {
+            get
+            {
+                if (_ourProbabilityData == null)
+                {
+                    _ourProbabilityData = Resources.Load<ProbabilityData>("ProbabilityMatrix");
+                }
+
+                return _ourProbabilityData;
+            }
+        }
+
         public string LogInId
         {
             get
@@ -47,14 +62,16 @@ namespace NPC
 
         public float Suspicion => _suspicion;
 
-        public float LineProbability()
-        {
-            var confidence = -this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.Fearfulness);
-            var negCuriosity = -this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.Curiosity);
-            var trust = -this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.Trust);
-            return 0.5f * (0.33f * NormalisedSigmoid(confidence) + 0.33f * NormalisedSigmoid(negCuriosity) +
-                           0.33f * NormalisedSigmoid(trust));
-        }
+        public float GetProbability(string key) => OurProbabilityData.CalculateProbability(this, key);
+        
+        // public float LineProbability()
+        // {
+        //     var confidence = -this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.Fearfulness);
+        //     var negCuriosity = -this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.Curiosity);
+        //     var trust = -this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.Trust);
+        //     return 0.5f * (0.33f * NormalisedSigmoid(confidence) + 0.33f * NormalisedSigmoid(negCuriosity) +
+        //                    0.33f * NormalisedSigmoid(trust));
+        // }
 
         public float GetTraitIntensity(PersonalityTrait.TraitType traitType)
         {
@@ -64,8 +81,8 @@ namespace NPC
             }
             return _traitTypeToTrait[traitType].Intensity;
         }
-    
-        private float GetTraitNormalisedIntensity(PersonalityTrait.TraitType traitType)
+
+        public float GetNormalisedTraitIntensity(PersonalityTrait.TraitType traitType)
         {
             if (!_traitTypeToTrait.ContainsKey(traitType))
             {
@@ -118,43 +135,27 @@ namespace NPC
                 _traitTypeToTrait[PersonalityTrait.TraitType.Trust].Intensity);
         }
 
-        public float NoteLostProbability()
-        {
-            var personNegligence = this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.Negligence);
-            var personTechnicalKnowledge = this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.TechnicalKnowledge);
-            return 0.7f * NormalisedSigmoid(personNegligence) + 0.3f * NormalisedSigmoid(personTechnicalKnowledge);
-        }
-
         public float ConversationJoiningProbability(Conversation conversation)
         {
-            var personCuriosity =
-                this.GetTraitNormalisedIntensity(
-                    PersonalityTrait.TraitType.Curiosity);
-            var personWillingness = this.GetTraitNormalisedIntensity(
-                PersonalityTrait.TraitType.WillingnessToHelp);
-            var personTrust = this.GetTraitNormalisedIntensity(
-                PersonalityTrait.TraitType.Trust);
-
             var conversationRating = 0f;
             foreach (var agent in conversation.Interlocutors)
             {
                 var relationship = GetRelation(agent);
                 
-                if (_personToRelationship[agent.Personality].IsSubordinate || this.IsManagedBy(agent))
+                if (IsSubordinate(agent.Personality) || this.IsManagedBy(agent))
                 {
-                    var responsibility = -GetTraitNormalisedIntensity(
+                    var responsibility = -GetNormalisedTraitIntensity(
                         PersonalityTrait.TraitType.Negligence);
-                    var confidence = -GetTraitNormalisedIntensity(
+                    var confidence = -GetNormalisedTraitIntensity(
                         PersonalityTrait.TraitType.Fearfulness);
-                    relationship = NormalisedSigmoid((responsibility + confidence + relationship) / 3f);
+                    relationship = ProbabilityUtility.NormalisedSigmoid((responsibility + confidence + relationship) / 3f);
                 }
                 conversationRating += relationship;
             }
 
             conversationRating /= conversation.Interlocutors.Count;
 
-            return 0.3f * NormalisedSigmoid(0.4f * personCuriosity + 0.4f * personTrust + 0.2f * personWillingness) +
-                   0.7f * NormalisedSigmoid(conversationRating);
+            return OurProbabilityData.CalculateProbability(this, "ConversationJoin") + 0.7f * ProbabilityUtility.NormalisedSigmoid(conversationRating);
         }
 
         public float GetRelation(BaseAgent other)
@@ -171,57 +172,41 @@ namespace NPC
             return _personToRelationship[other].NormalizedIntensity;
         }
 
-        public bool IsManagedBy(BaseAgent other)
+        public bool IsSubordinate(Personality other)
         {
-            return other.Personality._personToRelationship[this].IsSubordinate;
+            if (!_personToRelationship.ContainsKey(other)) return false;
+
+            return _personToRelationship[other].IsSubordinate;
         }
 
-        private static float NormalisedSigmoid(float val)
-        {
-            var f = Mathf.Exp(val/0.2f);
-            return 1 / (1 + f);
-        }
+        public bool IsManagedBy(BaseAgent other) => IsManagedBy(other.Personality);
 
         public string NoteText()
         {
             return "Password: " + KnownPassword;
         }
 
-        public float UsbAttackProbability()
-        {
-            //TODO USB attack
-            return 0f;
-        }
-
         public float ChatProbability(Personality secondPersonality)
         {
-            var personCuriosity =
-                this.GetTraitNormalisedIntensity(
-                    PersonalityTrait.TraitType.Curiosity);
-            var personWillingness = this.GetTraitNormalisedIntensity(
-                PersonalityTrait.TraitType.WillingnessToHelp);
-            var personTrust = this.GetTraitNormalisedIntensity(
-                PersonalityTrait.TraitType.Trust);
-
             var conversationRating = 0f;
             var relationship = GetRelation(secondPersonality);
                 
-            if (_personToRelationship[secondPersonality].IsSubordinate || this.IsManagedBy(secondPersonality))
+            if (IsSubordinate(secondPersonality) || this.IsManagedBy(secondPersonality))
             {
-                var responsibility = -GetTraitNormalisedIntensity(
+                var responsibility = -GetNormalisedTraitIntensity(
                     PersonalityTrait.TraitType.Negligence);
-                var confidence = -GetTraitNormalisedIntensity(
+                var confidence = -GetNormalisedTraitIntensity(
                     PersonalityTrait.TraitType.Fearfulness);
-                relationship = NormalisedSigmoid((responsibility + confidence + relationship) / 3f);
+                relationship = ProbabilityUtility.NormalisedSigmoid((responsibility + confidence + relationship) / 3f);
             }
             conversationRating += relationship;
 
-            return 0.3f * NormalisedSigmoid(0.4f * personCuriosity + 0.4f * personTrust + 0.2f * personWillingness) +
-                   0.7f * NormalisedSigmoid(conversationRating);
+            return 0.3f * OurProbabilityData.CalculateProbability(this, "Chat") + 0.7f * ProbabilityUtility.NormalisedSigmoid(conversationRating);
         }
 
         private bool IsManagedBy(Personality secondPersonality)
         {
+            if (!secondPersonality._personToRelationship.ContainsKey(this)) return false;
             return secondPersonality._personToRelationship[this].IsSubordinate;
         }
     }
