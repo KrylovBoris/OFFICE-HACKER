@@ -20,6 +20,7 @@ namespace Interactions
         public async void ResetSeat()
         {
             _isRotating = true;
+            _turningStartTime = Time.time;
             await ReturnToDefault();
             _isRotating = false;
         }
@@ -27,6 +28,7 @@ namespace Interactions
         public async void Turn(float angle)
         {
             _isRotating = true;
+            _turningStartTime = Time.time;
             await TurnByAngle(angle);
             _isRotating = false;
         }
@@ -38,7 +40,7 @@ namespace Interactions
         
             while (!IsChairAllignedWith(_targetTransform))
             {
-                Quaternion rot = Quaternion.Slerp(_startingPos, _targetTransform, turningSpeed * (Time.time));
+                Quaternion rot = Quaternion.Slerp(_startingPos, _targetTransform, turningSpeed * (Time.time - _turningStartTime));
                 transform.rotation = rot;
                 await Task.Yield();
             }
@@ -51,7 +53,7 @@ namespace Interactions
         
             while (!IsChairAllignedWith(_targetTransform))
             {
-                Quaternion rot = Quaternion.Slerp(_startingPos, _targetTransform, turningSpeed * (Time.time));
+                Quaternion rot = Quaternion.Slerp(_startingPos, _targetTransform, turningSpeed * (Time.time - _turningStartTime));
                 transform.rotation = rot;
                 await Task.Yield();
             }

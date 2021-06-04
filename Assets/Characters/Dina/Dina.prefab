@@ -1487,6 +1487,7 @@ MonoBehaviour:
   standardStoppingDistance: 0.05
   workingPlace: {fileID: 0}
   department: {fileID: 0}
+  _head: {fileID: 5869770960900899984}
   _personality: {fileID: 11400000, guid: a5fe0b637fce2034a95878e6958f7969, type: 2}
   minWaitTime: 0
   maxWaitTime: 1

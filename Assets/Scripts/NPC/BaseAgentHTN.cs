@@ -24,7 +24,8 @@ namespace NPC
                 _navMeshAgent.SetDestination(GetDestination());
                 StartCoroutine(CoroutineUtils.ConditionedAction(IsNearDestination, () =>
                 {
-                    AddAgentToZone(this);
+                    if (!HasRequestedToken())
+                        AddAgentToZone(this);
                 }));
             }
 	        public void TurnOnPC() => workingPlace.computer.TurnOn();
@@ -131,11 +132,11 @@ namespace NPC
             }
 	        public void InitTalk()
             {
-                _animationManager.LookAt(_currentConversation.GetSpeaker().Head);
+                _animationManager.LookAt(_currentConversation);
             }
 	        public void WaitPlayerResponse()
             {
-                throw new NotImplementedException();
+                _currentConversation.RequestLine();
             }
 	        public void RequestFaxToken()
             {
@@ -289,7 +290,8 @@ namespace NPC
             }
 	        public bool IsComputerOn() => workingPlace.computer.IsOn;
 
-            public bool IsLoggedIn() => workingPlace.computer.IsLoggedIn(out var id) && id == _personality.LogInId;
+            public bool IsLoggedIn() => 
+                workingPlace.computer.IsLoggedIn(out var id) && id == _personality.LogInId;
             public bool ChairRotationComplete()
             {
                 return workingPlace.chair.IsRotationComplete();
@@ -321,9 +323,7 @@ namespace NPC
             
             public bool HasPlayerResponse()
             {
-                var res = true;
-                throw new NotImplementedException();
-                return res;
+                return _currentConversation.GetSpeaker() == this;
             }
 	        public bool WillTalk()
             {
@@ -339,19 +339,24 @@ namespace NPC
             }
 	        public bool HasToStopChat()
             {
-                var res = HasRequestedToken() || _currentConversation == null;
+                var res = HasRequestedToken() || 
+                          _currentConversation != null && _currentConversation.IsAbandoned;
                 return res;
             }
 	        public bool InterlocutorFound()
             {
                 return WaitingZone.HasConversation(this);
             }
-	        public bool CanChat()
+	        public bool CanSpeak()
             {
-                var res = true;
-                throw new NotImplementedException();
-                return res;
+                return _currentConversation.GetSpeaker() == this;
             }
+            
+            private bool HasConversation()
+            {
+                return _currentConversation != null;
+            }
+            
 	        public bool WillGoToBreakRoom()
             {
                 var res = true;
@@ -1024,10 +1029,10 @@ namespace NPC
 
             HtnTask.Condition[] finishConditions =
             {
-                () => HasNpcResponse()
+                HasNpcResponse
             };
 
-            SimpleTask.TaskAction action = WaitNPCResponse;
+            SimpleTask.TaskAction action = () => {};
 
             var task = new SimpleTask(
                 name + "WaitNPCLine",
@@ -1455,7 +1460,8 @@ namespace NPC
         public HtnTask[] DecomposeWorkAtPC()
         {
             var tasks = new List<HtnTask>();
-            tasks.Add(CreateStartTyping());
+            if (!IsTyping())
+                tasks.Add(CreateStartTyping());
             if(IsLoggedIn()) {
             }
             else {
@@ -1606,7 +1612,7 @@ namespace NPC
         {
             HtnTask.Condition[] preConditions = 
             { 
-                //() => CanChat(),  
+                () => HasConversation(),  
             };
         
             HtnTask.Condition[] integrityRules = HtnTask.EmptyCondition;
@@ -1620,6 +1626,7 @@ namespace NPC
                 integrityRules);
             return task;
         }
+
         public HtnTask[] DecomposeTalkPlayer()
         {
             var tasks = new List<HtnTask>();
@@ -1685,13 +1692,19 @@ namespace NPC
         public HtnTask[] DecomposeChattingNPC()
         {
             var tasks = new List<HtnTask>();
+            
             tasks.Add(CreateWaitNPCLine());
             tasks.Add(CreateEmote());
-            tasks.Add(CreateNPCLine());
+            
             if(HasToStopChat()) {
                 tasks.Add(CreateEndConversation());
             }
             else {
+                if (CanSpeak())
+                {
+                    tasks.Add(CreateNPCLine());
+                }
+                
                 tasks.Add(CreateChattingNPC());
             }
             return tasks.ToArray();

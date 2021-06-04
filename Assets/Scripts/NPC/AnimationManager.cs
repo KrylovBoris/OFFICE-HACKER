@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Collections.Viewable;
 using NPC;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -11,7 +12,7 @@ public class AnimationManager : MonoBehaviour
     [SerializeField]
     [Range(0f, 1f)]
     private float maxIkStrength;
-    private Transform _sightDirection;
+    private ISightController _sightController;
     private bool _isLookingAtInterlocutor = false;
     private static readonly int Vertical = Animator.StringToHash("Vertical");
     private static readonly int Horizontal = Animator.StringToHash("Horizontal");
@@ -21,6 +22,7 @@ public class AnimationManager : MonoBehaviour
     private static readonly int StopTyping1 = Animator.StringToHash("StopTyping");
     private static readonly int Action = Animator.StringToHash("Action");
     private static readonly int EmoteHash = Animator.StringToHash("Emote");
+    private static readonly int SpeakHash = Animator.StringToHash("Talking");
     private static readonly int Stop = Animator.StringToHash("Stop");
 
     public bool IsAnimatingAction
@@ -28,6 +30,8 @@ public class AnimationManager : MonoBehaviour
         get => _isAnimatingAction;
         set => _isAnimatingAction = value;
     }
+    
+    public ViewableProperty<bool> IsSpeaking { get; } = new ViewableProperty<bool>();
 
     void Start()
     {
@@ -46,7 +50,7 @@ public class AnimationManager : MonoBehaviour
     {
         if (_isLookingAtInterlocutor)
         {
-            _animator.SetLookAtPosition(_sightDirection.position);
+            _animator.SetLookAtPosition(_sightController.GetSightTarget() );
             _animator.SetLookAtWeight(maxIkStrength);
         }
     }
@@ -94,10 +98,10 @@ public class AnimationManager : MonoBehaviour
         _animator.SetTrigger(Stop);
     }
 
-    public void LookAt(Transform lookAtTransform)
+    public void LookAt(ISightController lookAtTransform)
     {
         _isLookingAtInterlocutor = true;
-        _sightDirection = lookAtTransform;
+        _sightController = lookAtTransform;
     }
 
     public void EmoteAny()
@@ -109,12 +113,18 @@ public class AnimationManager : MonoBehaviour
     public void SayLine()
     {
         _isAnimatingAction = true;
-        _animator.SetInteger(EmoteHash, Random.Range(1, 4));
+        _animator.SetInteger(SpeakHash, Random.Range(1, 4));
     }
 
     public void ResetHead()
     {
         _isLookingAtInterlocutor = false;
-        _sightDirection = null;
+        _sightController = null;
     }
+
+    public void StopSpeaking()
+    {
+        IsSpeaking.Value = true;
+    }
+
 }

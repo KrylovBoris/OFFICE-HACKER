@@ -6,10 +6,13 @@ namespace NPC
     {
         public override AiToken RequestToken()
         {
-            var spot = GetArchiveAvailableSpot();
-            if (spot) return FaxMachineToken.MakeToken(spot);
+            var spot = GetAvailableSpot();
+            if (spot) return this.MakeToken(spot);
         
             return MakeRequestToken();
         }
+        
+        protected override AiToken MakeToken(Transform spot) =>
+            new FaxMachineToken(spot, this);
     }
 }

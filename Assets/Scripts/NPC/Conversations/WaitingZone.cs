@@ -30,7 +30,12 @@ namespace NPC
             }
             else
             {
-                JoinConversation(interlocutor, out _);
+                JoinConversation(interlocutor, out var success);
+                if (!success)
+                {
+                    _candidates.Add(interlocutor);
+                    MakeConversationFromScratch();
+                }
             }
         }
 

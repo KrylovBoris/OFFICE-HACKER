@@ -11,17 +11,20 @@ namespace NPC
     public class ArchiveSearchToken : AiToken
     {
         public readonly SearchArchiveMethod Method;
-        public readonly Transform SearchingSpot; 
-        
-        public ArchiveSearchToken(Transform searchingSpot, SearchArchiveMethod method)
+        public readonly Transform SearchingSpot;
+        private ArchiveTokenDispenser _dispenser;
+
+        public ArchiveSearchToken(Transform searchingSpot, SearchArchiveMethod method, ArchiveTokenDispenser dispenser)
         {
             this.SearchingSpot = searchingSpot;
             this.Method = method;
+            _dispenser = dispenser;
         }
-
-        public static ArchiveSearchToken MakeToken(Transform spot) =>
-            new ArchiveSearchToken(spot, 
-                Random.Range(0, 1) > 0.5f ? SearchArchiveMethod.StandSearch : SearchArchiveMethod.SitSearch);
         
+        public override void Finish()
+        {
+            _dispenser.FreeSpot(SearchingSpot);
+            base.Finish();
+        }
     }
 }

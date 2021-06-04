@@ -4,15 +4,20 @@ namespace NPC
 {
     public class FaxMachineToken : AiToken
     {
+        private readonly FaxMachineTokenDispenser _dispenser;
         public readonly Transform SearchingSpot; 
         
-        public FaxMachineToken(Transform searchingSpot)
+        public FaxMachineToken(Transform searchingSpot, FaxMachineTokenDispenser issuer)
         {
             this.SearchingSpot = searchingSpot;
+            _dispenser = issuer;
         }
 
-        public static FaxMachineToken MakeToken(Transform spot) =>
-            new FaxMachineToken(spot);
+        public override void Finish()
+        {
+            _dispenser.FreeSpot(SearchingSpot);
+            base.Finish();
+        }
 
     }
 }

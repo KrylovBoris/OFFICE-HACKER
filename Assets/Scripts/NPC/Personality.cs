@@ -47,6 +47,15 @@ namespace NPC
 
         public float Suspicion => _suspicion;
 
+        public float LineProbability()
+        {
+            var confidence = -this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.Fearfulness);
+            var negCuriosity = -this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.Curiosity);
+            var trust = -this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.Trust);
+            return 0.5f * (0.33f * NormalisedSigmoid(confidence) + 0.33f * NormalisedSigmoid(negCuriosity) +
+                           0.33f * NormalisedSigmoid(trust));
+        }
+
         public float GetTraitIntensity(PersonalityTrait.TraitType traitType)
         {
             if (!_traitTypeToTrait.ContainsKey(traitType))
@@ -68,6 +77,7 @@ namespace NPC
         void OnEnable()
         {
             _traitTypeToTrait = new Dictionary<PersonalityTrait.TraitType, PersonalityTrait>();
+            _personToRelationship = new Dictionary<Personality, Relationship>();
             _personalityMask = PersonalityTrait.GetTraitBitMask(traitArray);
             foreach (var trait in traitArray)
             {
@@ -78,6 +88,18 @@ namespace NPC
                 else
                 {
                     _traitTypeToTrait.Add(trait.type, trait);
+                }
+            }
+
+            foreach (var relationship in relationships)
+            {
+                if (_personToRelationship.ContainsKey(relationship.OtherPerson))
+                {
+                    throw new Exception("Multiple same-type personality relations detected");
+                }
+                else
+                {
+                    _personToRelationship.Add(relationship.OtherPerson, relationship);
                 }
             }
         }
@@ -100,7 +122,7 @@ namespace NPC
         {
             var personNegligence = this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.Negligence);
             var personTechnicalKnowledge = this.GetTraitNormalisedIntensity(PersonalityTrait.TraitType.TechnicalKnowledge);
-            return ((0.7f * NormalisedSigmoid(personNegligence) + 0.3f * NormalisedSigmoid(personTechnicalKnowledge)));
+            return 0.7f * NormalisedSigmoid(personNegligence) + 0.3f * NormalisedSigmoid(personTechnicalKnowledge);
         }
 
         public float ConversationJoiningProbability(Conversation conversation)
@@ -156,7 +178,7 @@ namespace NPC
 
         private static float NormalisedSigmoid(float val)
         {
-            var f = Mathf.Exp(val/0.1f);
+            var f = Mathf.Exp(val/0.2f);
             return 1 / (1 + f);
         }
 
@@ -200,7 +222,7 @@ namespace NPC
 
         private bool IsManagedBy(Personality secondPersonality)
         {
-            throw new NotImplementedException();
+            return secondPersonality._personToRelationship[this].IsSubordinate;
         }
     }
 
@@ -216,7 +238,7 @@ namespace NPC
         [SerializeField]
         private Personality subject;
 
-        public bool OtherPerson => subject;
+        public Personality OtherPerson => subject;
         public bool IsSubordinate => isSubordinate;
 
         public float NormalizedIntensity => intensity / 100f;

@@ -20,7 +20,7 @@ public class TalkingBehaviour : StateMachineBehaviour
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        //animator.gameObject.GetComponent<Agent.BaseAgent>().FinalizeArchiveSearch();
+        animator.gameObject.GetComponent<AnimationManager>().StopSpeaking();
         animator.SetInteger(Talking, 0);
     }
 
