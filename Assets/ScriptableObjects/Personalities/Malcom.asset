@@ -21,4 +21,7 @@ MonoBehaviour:
     traitIntensity: -40
   - type: 3
     traitIntensity: 100
-  relationships: []
+  relationships:
+  - intensity: -100
+    isSubordinate: 1
+    subject: {fileID: 11400000, guid: bc52478fe9d50cb43abab06247ad2a24, type: 2}

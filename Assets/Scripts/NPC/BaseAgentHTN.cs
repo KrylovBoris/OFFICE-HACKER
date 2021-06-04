@@ -275,7 +275,7 @@ namespace NPC
             }
             public bool WillWorkOnPC()
             {
-                var res = Random.Range(0, 100) < 0;
+                var res = Random.Range(0, 100) < 50;
                 //TODO: Personality-based choice
                 if (_hasToWorkOnPc)
                 {
@@ -322,7 +322,7 @@ namespace NPC
             }
 	        public bool WillSearchArchives()
             {
-                var res = Random.Range(0, 100) < 101;
+                var res = Random.Range(0, 100) < 50;
                 //TODO: Personality-based choice
                 return res;
             }

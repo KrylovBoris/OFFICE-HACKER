@@ -77,3 +77,11 @@ MonoBehaviour:
     Fearfulness: 1
     Greed: 0
     Trust: -1
+  - key: Phishing
+    Curiosity: 0.029
+    Negligence: 0.039
+    TechnicalKnowledge: 0.029
+    WillingnessToHelp: 0.02
+    Fearfulness: 0
+    Greed: 0
+    Trust: 0

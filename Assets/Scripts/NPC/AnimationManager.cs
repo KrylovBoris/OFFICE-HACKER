@@ -13,6 +13,7 @@ public class AnimationManager : MonoBehaviour
     [Range(0f, 1f)]
     private float maxIkStrength;
     private ISightController _sightController;
+    private BaseAgent _agent;
     private bool _isLookingAtInterlocutor = false;
     private static readonly int Vertical = Animator.StringToHash("Vertical");
     private static readonly int Horizontal = Animator.StringToHash("Horizontal");
@@ -37,6 +38,7 @@ public class AnimationManager : MonoBehaviour
     void Start()
     {
         _animator = GetComponent<Animator>();
+        _agent = GetComponent<BaseAgent>();
     }
 
     // Update is called once per frame
@@ -51,7 +53,7 @@ public class AnimationManager : MonoBehaviour
     {
         if (_isLookingAtInterlocutor)
         {
-            _animator.SetLookAtPosition(_sightController.GetSightTarget() );
+            _animator.SetLookAtPosition(_sightController.GetSightTarget(_agent));
             _animator.SetLookAtWeight(maxIkStrength);
         }
     }

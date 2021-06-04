@@ -99,6 +99,16 @@ namespace NPC
             _interlocutors.Remove(speaker);
         }
 
-        public Vector3 GetSightTarget() => GetSpeaker().Head.position;
+        public Vector3 GetSightTarget(BaseAgent forAgent) 
+        {
+            var speakerHead = GetSpeaker().Head;
+            Vector3 target = speakerHead.position;
+            if (GetSpeaker() == forAgent.Head)
+            {
+                target = target + speakerHead.forward;
+            }
+            return target;
+
+        } 
     }
 }
