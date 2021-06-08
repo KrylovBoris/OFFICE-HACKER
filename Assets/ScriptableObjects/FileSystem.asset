@@ -9,16 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c94e1c525bb6054daf24f0b6f51a25d, type: 3}
-  m_Name: Dina
+  m_Script: {fileID: 11500000, guid: 82a00de7f6eaad447bb191699d1cbe39, type: 3}
+  m_Name: FileSystem
   m_EditorClassIdentifier: 
-  personName: Dina Polendina
-  passwordTypingTime: 7
-  traitArray:
-  - type: 2
-    traitIntensity: 50
-  - type: 1
-    traitIntensity: 15
-  - type: 5
-    traitIntensity: -55
-  relationships: []
+  paths:
+  - root
+  - root\1
+  - root\1\32.txt
+  - root\1\Node
+  - root\2
+  - root\2\1232.png
+  sizes: ffffffffffffffffffffffffffffffffffffffffffffffff

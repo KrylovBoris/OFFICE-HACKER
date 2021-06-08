@@ -10,18 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c94e1c525bb6054daf24f0b6f51a25d, type: 3}
-  m_Name: Malcom
+  m_Name: ElisePersonality
   m_EditorClassIdentifier: 
-  personName: Malcom Malcom
+  personName: Elise Louise
   passwordTypingTime: 5
   traitArray:
-  - type: 2
-    traitIntensity: -38
-  - type: 5
-    traitIntensity: -40
+  - type: 1
+    traitIntensity: 80
   - type: 3
-    traitIntensity: 100
-  relationships:
-  - intensity: -100
-    isSubordinate: 1
-    subject: {fileID: 11400000, guid: bc52478fe9d50cb43abab06247ad2a24, type: 2}
+    traitIntensity: -40
+  - type: 4
+    traitIntensity: 40
+  relationships: []

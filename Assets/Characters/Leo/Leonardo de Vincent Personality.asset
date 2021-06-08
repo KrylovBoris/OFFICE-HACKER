@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c94e1c525bb6054daf24f0b6f51a25d, type: 3}
-  m_Name: Elise
+  m_Name: Leonardo de Vincent Personality
   m_EditorClassIdentifier: 
-  personName: Elise Louise
-  passwordTypingTime: 5
+  personName: Leonardo de Vincent
+  passwordTypingTime: 8
   traitArray:
+  - type: 2
+    traitIntensity: 15
+  - type: 5
+    traitIntensity: -55
   - type: 1
-    traitIntensity: 80
-  - type: 3
-    traitIntensity: -40
-  - type: 4
-    traitIntensity: 40
+    traitIntensity: 15
   relationships: []

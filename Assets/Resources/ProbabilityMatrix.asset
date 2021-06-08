@@ -63,11 +63,11 @@ MonoBehaviour:
     Trust: 0.33
   - key: BreakRoom
     Curiosity: 0.5
-    Negligence: 0.2
-    TechnicalKnowledge: 0.2
+    Negligence: 0
+    TechnicalKnowledge: 0
     WillingnessToHelp: 0.4
     Fearfulness: -1
-    Greed: 0.19999999
+    Greed: 0
     Trust: 0.5
   - key: Kitchen
     Curiosity: 0
@@ -77,11 +77,3 @@ MonoBehaviour:
     Fearfulness: 1
     Greed: 0
     Trust: -1
-  - key: Phishing
-    Curiosity: 0.029
-    Negligence: 0.039
-    TechnicalKnowledge: 0.029
-    WillingnessToHelp: 0.02
-    Fearfulness: 0
-    Greed: 0
-    Trust: 0
