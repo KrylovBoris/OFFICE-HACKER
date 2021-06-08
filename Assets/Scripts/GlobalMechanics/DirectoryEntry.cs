@@ -1,69 +1,74 @@
-﻿using TMPro;
+﻿using FileSystem;
+using GlobalMechanics.UI;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public class DirectoryEntry : MonoBehaviour, IPointerClickHandler
+namespace GlobalMechanics
 {
-
-    [Tooltip("icon that displays directory")]
-    [SerializeField]
-    private Image icon;
-    public Image Icon => icon;
-    public TMP_InputField directoryName;
-    public GameFileSystem fileSystem;
-    public GameObject toolPanel;
-    private string _fullPath;
-    public string Path => _fullPath;
-    private bool _isPathSet = false;
-    
-    public void OnPointerClick(PointerEventData eventData)
+    public class DirectoryEntry : MonoBehaviour, IPointerClickHandler
     {
-        if (eventData.button == PointerEventData.InputButton.Right)
+
+        [Tooltip("icon that displays directory")]
+        [SerializeField]
+        private Image icon;
+        public Image Icon => icon;
+        public TMP_InputField directoryName;
+        public GameFileSystem fileSystem;
+        public GameObject toolPanel;
+        private string _fullPath;
+        public string Path => _fullPath;
+        private bool _isPathSet = false;
+    
+        public void OnPointerClick(PointerEventData eventData)
         {
-            var tools = Instantiate(toolPanel, eventData.position, fileSystem.transform.rotation, fileSystem.transform);
-            fileSystem.ConnectExplorerTools(tools);
-            tools.GetComponent<ExplorerTools>().EstablishConnection(fileSystem, this);
+            if (eventData.button == PointerEventData.InputButton.Right)
+            {
+                var tools = Instantiate(toolPanel, eventData.position, fileSystem.transform.rotation, fileSystem.transform);
+                fileSystem.ConnectExplorerTools(tools);
+                tools.GetComponent<ExplorerTools>().EstablishConnection(fileSystem, this);
+            }
+            else
+            {
+                fileSystem.DisconnectExplorerTools();
+            }
         }
-        else
+
+        public void SetPath(string path, Sprite fileIcon, GameFileSystem gameFileSystem)
         {
-            fileSystem.DisconnectExplorerTools();
+            if (!_isPathSet)
+            {
+                SetControllingSystem(gameFileSystem);
+                _fullPath = path;
+                directoryName.text = path.Substring(path.LastIndexOf('\\') + 1);
+                _isPathSet = true;
+                Icon.sprite = fileIcon;
+            }
         }
-    }
 
-    public void SetPath(string path, Sprite fileIcon, GameFileSystem gameFileSystem)
-    {
-        if (!_isPathSet)
+        public void SetControllingSystem(GameFileSystem system)
         {
-            SetControllingSystem(gameFileSystem);
-            _fullPath = path;
-            directoryName.text = path.Substring(path.LastIndexOf('\\') + 1);
-            _isPathSet = true;
-            Icon.sprite = fileIcon;
+            fileSystem = system;
         }
-    }
-
-    public void SetControllingSystem(GameFileSystem system)
-    {
-        fileSystem = system;
-    }
     
-    public void Open()
-    {
-        fileSystem.OpenDirectory(_fullPath);
-    }
+        public void Open()
+        {
+            fileSystem.OpenDirectory(_fullPath);
+        }
 
-    public void StartRenaming()
-    {
-        var text = directoryName.text;
-        directoryName.interactable = true;
-        directoryName.text = text;
-    }
+        public void StartRenaming()
+        {
+            var text = directoryName.text;
+            directoryName.ActivateInputField();
+            directoryName.text = text;
+        }
 
-    public void FinishRenaming()
-    {
-        //TODO Rename
-    }
+        public void FinishRenaming()
+        {
+            //TODO Rename
+        }
     
     
+    }
 }

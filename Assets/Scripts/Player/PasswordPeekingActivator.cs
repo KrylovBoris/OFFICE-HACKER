@@ -1,42 +1,47 @@
-﻿using UnityEngine;
+﻿using GlobalMechanics;
+using Interactions;
+using UnityEngine;
 
-public class PasswordPeekingActivator : MonoBehaviour
+namespace Player
 {
-    private float _passwordTypingStart;
-    private PasswordPeek _player;
-    private WorkPlace _workPlace;
-
-    private void Start()
+    public class PasswordPeekingActivator : MonoBehaviour
     {
-        _player = GameManager.gm.player.GetComponent<PasswordPeek>();
-        _workPlace = GetComponentInParent<WorkPlace>();
-    }
+        private float _passwordTypingStart;
+        private PasswordPeek _player;
+        private WorkPlace _workPlace;
+
+        private void Start()
+        {
+            _player = GameManager.gm.player.GetComponent<PasswordPeek>();
+            _workPlace = GetComponentInParent<WorkPlace>();
+        }
     
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.CompareTag("Player") && _workPlace.IsVictimVulnerable)
+        private void OnTriggerStay(Collider other)
         {
-            _player = other.gameObject.GetComponent<PasswordPeek>();
-            _player.MakePeekingPossible(_workPlace.WorkerOnSite, _workPlace.PasswordTypingStart);
+            if (other.CompareTag("Player") && _workPlace.IsVictimVulnerable)
+            {
+                _player = other.gameObject.GetComponent<PasswordPeek>();
+                _player.MakePeekingPossible(_workPlace.WorkerOnSite, _workPlace.PasswordTypingStart);
+            }
+
+            if (!_workPlace.IsVictimVulnerable && _player.IsPeeking)
+            {
+                DisablePeeking();
+            }
         }
 
-        if (!_workPlace.IsVictimVulnerable && _player.IsPeeking)
+        private void OnTriggerExit(Collider other)
         {
-            DisablePeeking();
+            if (other.CompareTag("Player") && _workPlace.IsVictimVulnerable)
+            {
+                DisablePeeking();
+            }
         }
-    }
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player") && _workPlace.IsVictimVulnerable)
+        private void DisablePeeking()
         {
-            DisablePeeking();
+            _player.DeactivatePeeking();
+            _player.MakePeekingImpossible();
         }
-    }
-
-    private void DisablePeeking()
-    {
-        _player.DeactivatePeeking();
-        _player.MakePeekingImpossible();
     }
 }

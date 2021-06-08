@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Global_Mechanics;
+using GlobalMechanics;
+using NPC.Conversations;
 using UnityEngine;
 
 namespace NPC

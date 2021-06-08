@@ -1,27 +1,30 @@
-﻿using Agent;
+﻿using GlobalMechanics.UI;
 using NPC;
 using UnityEngine;
 
-public class DialogueInterator : MonoBehaviour, IInteractable
+namespace Interactions
 {
-    private string _interactionString = "Talk";
-    private InterruptionFlagsHandler _handler;
-
-    private Personality _personality;
-    // Start is called before the first frame update
-    void Start()
+    public class DialogueInterator : MonoBehaviour, IInteractable
     {
-        _handler = GetComponent<InterruptionFlagsHandler>();
-        _personality = GetComponent<Personality>();
-    }
+        private string _interactionString = "Talk";
+        private InterruptionFlagsHandler _handler;
 
-    public void Interact()
-    {
-        _handler.RaiseFlag(InterruptionFlag.Talk);
-    }
+        private Personality _personality;
+        // Start is called before the first frame update
+        void Start()
+        {
+            _handler = GetComponent<InterruptionFlagsHandler>();
+            _personality = GetComponent<Personality>();
+        }
 
-    public string InteractionDescription()
-    {
-        return _interactionString;
+        public void Interact()
+        {
+            _handler.RaiseFlag(InterruptionFlag.Talk);
+        }
+
+        public string InteractionDescription()
+        {
+            return _interactionString;
+        }
     }
 }

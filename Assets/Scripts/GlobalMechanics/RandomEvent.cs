@@ -1,34 +1,37 @@
 ﻿using Random = UnityEngine.Random;
 
-public class RandomEvent
+namespace GlobalMechanics
 {
-    public delegate float ProbabilityFunction();
-
-    private ProbabilityFunction _probability;
-    private float _maxProbabilityFunctionValue;
-    private float _minProbabilityFunctionValue;
-
-    public RandomEvent(ProbabilityFunction f, float maxValue = 1.0f, float minValue = 0.0f)
+    public class RandomEvent
     {
-        _probability = f;
-        _maxProbabilityFunctionValue = maxValue;
-        _minProbabilityFunctionValue = minValue;
-    }
+        public delegate float ProbabilityFunction();
 
-    public bool HasEventHappened()
-    {
-        var baselineVal = RandomVal();
-        var probability = EventProbability();
-        return baselineVal <= probability;
-    }
+        private ProbabilityFunction _probability;
+        private float _maxProbabilityFunctionValue;
+        private float _minProbabilityFunctionValue;
 
-    public float EventProbability()
-    {
-        return _probability.Invoke();
-    }
+        public RandomEvent(ProbabilityFunction f, float maxValue = 1.0f, float minValue = 0.0f)
+        {
+            _probability = f;
+            _maxProbabilityFunctionValue = maxValue;
+            _minProbabilityFunctionValue = minValue;
+        }
 
-    private float RandomVal()
-    {
-        return (float) Random.Range(_minProbabilityFunctionValue, _maxProbabilityFunctionValue);
+        public bool HasEventHappened()
+        {
+            var baselineVal = RandomVal();
+            var probability = EventProbability();
+            return baselineVal <= probability;
+        }
+
+        public float EventProbability()
+        {
+            return _probability.Invoke();
+        }
+
+        private float RandomVal()
+        {
+            return (float) Random.Range(_minProbabilityFunctionValue, _maxProbabilityFunctionValue);
+        }
     }
 }

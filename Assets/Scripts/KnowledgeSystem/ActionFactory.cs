@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace KnowledgeContainer
+namespace KnowledgeSystem
 {
     public class ActionFactory
     {

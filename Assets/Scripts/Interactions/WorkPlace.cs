@@ -1,115 +1,119 @@
-﻿using Interactions;
+﻿using GlobalMechanics;
 using NPC;
+using Player;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public class WorkPlace : MonoBehaviour
+namespace Interactions
 {
-    public float computerDirection = 90.0f;
-    public Transform navMeshDestination;
-    public Chair chair;
-    public Computer computer;
-    
-    
-    private bool _isOccupied = false;
-    private bool _isVictimVulnerable = false;
-    private float _passwordTypingStart;
-    private float _passwordTypingTime;
-    private Personality _workingPerson;
-    private NoteSpawner _noteSpawner;
-    private PasswordPeekingActivator _passwordPeekingActivator;
-
-    public bool IsOccupied => _isOccupied;
-
-    public bool IsVictimVulnerable => _isVictimVulnerable;
-
-    public bool IsLoggedInCorrectProfile
+    public class WorkPlace : MonoBehaviour
     {
-        get
+        public float computerDirection = 90.0f;
+        public Transform navMeshDestination;
+        public Chair chair;
+        public Computer computer;
+    
+    
+        private bool _isOccupied = false;
+        private bool _isVictimVulnerable = false;
+        private float _passwordTypingStart;
+        private float _passwordTypingTime;
+        private Personality _workingPerson;
+        private NoteSpawner _noteSpawner;
+        private PasswordPeekingActivator _passwordPeekingActivator;
+
+        public bool IsOccupied => _isOccupied;
+
+        public bool IsVictimVulnerable => _isVictimVulnerable;
+
+        public bool IsLoggedInCorrectProfile
         {
-            string login;
-            if (computer.IsLoggedIn(out login))
+            get
             {
-                if (login == _workingPerson.LogInId)
+                string login;
+                if (computer.IsLoggedIn(out login))
                 {
-                    return true;
+                    if (login == _workingPerson.LogInId)
+                    {
+                        return true;
+                    }
                 }
+
+                return false;
             }
-
-            return false;
         }
-    }
 
-    public float PasswordTypingStart => _passwordTypingStart;
+        public float PasswordTypingStart => _passwordTypingStart;
 
-    private void Start()
-    {
-        _noteSpawner = GetComponent<NoteSpawner>();
-    }
-
-    public void SpawnExternalNote(string text)
-    {
-        _noteSpawner.SpawnHiddenNote(text);
-    }
-
-    public Personality WorkerOnSite
-    {
-        get
+        private void Start()
         {
-            Assert.IsTrue(_isOccupied);
-            Assert.IsNotNull(_workingPerson);
-            return _workingPerson;
+            _noteSpawner = GetComponent<NoteSpawner>();
         }
-    }
+
+        public void SpawnExternalNote(string text)
+        {
+            _noteSpawner.SpawnHiddenNote(text);
+        }
+
+        public Personality WorkerOnSite
+        {
+            get
+            {
+                Assert.IsTrue(_isOccupied);
+                Assert.IsNotNull(_workingPerson);
+                return _workingPerson;
+            }
+        }
     
-    public bool IsChairFacingComputer()
-    {
-        return chair.IsChairAllignedWith(Quaternion.AngleAxis(computerDirection, Vector3.up));
-    }
+        public bool IsChairFacingComputer()
+        {
+            return chair.IsChairAllignedWith(Quaternion.AngleAxis(computerDirection, Vector3.up));
+        }
     
-    public void TurnToComputer()
-    {
-        chair.Turn(computerDirection);
-    }
+        public void TurnToComputer()
+        {
+            chair.Turn(computerDirection);
+        }
     
-    public bool CharacterCanStandUp()
-    {
-        var checkingSpherePos = navMeshDestination.position + Vector3.up * 0.5f;
-        return !(Physics.CheckSphere(checkingSpherePos, 0.5f, LayerMask.GetMask("Furniture")));
-    }
+        public bool CharacterCanStandUp()
+        {
+            var checkingSpherePos = navMeshDestination.position + Vector3.up * 0.5f;
+            return !(Physics.CheckSphere(checkingSpherePos, 0.5f, LayerMask.GetMask("Furniture")));
+        }
 
-    public void CharacterSeated(Personality person)
-    {
-        _workingPerson = person;
-        _isOccupied = true;
-    }
+        public void CharacterSeated(Personality person)
+        {
+            _workingPerson = person;
+            _isOccupied = true;
+        }
 
-    public void CharacterStoodUp()
-    {
-        _isOccupied = false;
-        _workingPerson = null;
-    }
+        public void CharacterStoodUp()
+        {
+            _isOccupied = false;
+            _workingPerson = null;
+        }
 
-    public void StartTypingPassword(float passwordTime)
-    {
-        _passwordTypingStart = Time.time;
-        _passwordTypingTime = passwordTime;
-        _isVictimVulnerable = true;
-    }
+        public void StartTypingPassword(float passwordTime)
+        {
+            _passwordTypingStart = Time.time;
+            _passwordTypingTime = passwordTime;
+            _isVictimVulnerable = true;
+        }
 
-    public void StopTypingPassword()
-    {
-        _isVictimVulnerable = false;
-    }
-    public void LogIn(string id, string password, out bool rightPassword)
-    {
-        computer.ChooseProfile(id);
-        computer.CheckPassword(password, out rightPassword);
-    }
+        public void StopTypingPassword()
+        {
+            _isVictimVulnerable = false;
+        }
+        public void LogIn(string id, string password, out bool rightPassword)
+        {
+            computer.ChooseProfile(id);
+            computer.CheckPassword(password, out rightPassword);
+        }
 
-    public void LogOut()
-    {
-        computer.LogOut();
-    }
+        public void LogOut()
+        {
+            computer.LogOut();
+        }
     
+    }
 }

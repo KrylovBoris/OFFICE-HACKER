@@ -1,7 +1,7 @@
 using FileSystem;
 using UnityEngine;
 
-namespace Global_Mechanics
+namespace GlobalMechanics.ScriptableObjects
 {
     [CreateAssetMenu(fileName = "Email", menuName = "ScriptableObjects/E-Mail", order = 2)]
     public class Email:ScriptableObject

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Agent;
+using GlobalMechanics;
 using HierarchicalTaskNetwork;
+using Interactions;
+using NPC.Conversations;
+using NPC.Tokens;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Assertions;

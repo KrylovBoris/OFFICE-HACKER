@@ -1,14 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class TutorialTriggerObjectEnabled : MonoBehaviour
+namespace TutorialSystem
 {
-    private TutorialSystem system;
-
-    void Start()
+    public class TutorialTriggerObjectEnabled : MonoBehaviour
     {
-        system = GameObject.Find("TutorialObjects").GetComponent<TutorialSystem>();
-        system.Triggered();
+        private TutorialSystem system;
+
+        void Start()
+        {
+            system = GameObject.Find("TutorialObjects").GetComponent<TutorialSystem>();
+            system.Triggered();
+        }
     }
 }

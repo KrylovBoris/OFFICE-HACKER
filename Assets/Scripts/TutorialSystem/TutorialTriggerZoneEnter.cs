@@ -1,20 +1,21 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class TutorialTriggerZoneEnter : MonoBehaviour
+namespace TutorialSystem
 {
-    private TutorialSystem system;
-
-    void Start()
+    public class TutorialTriggerZoneEnter : MonoBehaviour
     {
-        system = transform.GetComponentInParent<TutorialSystem>();
-    }
+        private TutorialSystem system;
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.name == "Player")
-            system.Triggered();
-    }
+        void Start()
+        {
+            system = transform.GetComponentInParent<TutorialSystem>();
+        }
 
+        void OnTriggerEnter(Collider other)
+        {
+            if (other.name == "Player")
+                system.Triggered();
+        }
+
+    }
 }

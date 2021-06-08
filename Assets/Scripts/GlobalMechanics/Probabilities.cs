@@ -1,6 +1,6 @@
 using NPC;
 
-namespace Global_Mechanics
+namespace GlobalMechanics
 {
     public static class Probabilities
     {

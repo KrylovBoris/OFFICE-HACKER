@@ -1,7 +1,8 @@
+using GlobalMechanics;
 using JetBrains.Collections.Viewable;
 using UnityEngine;
 
-namespace NPC
+namespace NPC.Tokens
 {
     public enum TokenStatus
     {

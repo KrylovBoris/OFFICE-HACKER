@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Player.Store;
+using GlobalMechanics.UI.Store;
 using UnityEngine;
 
 namespace Player

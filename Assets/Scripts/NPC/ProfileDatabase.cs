@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using GlobalMechanics.ScriptableObjects;
 using UnityEngine;
 
 namespace NPC

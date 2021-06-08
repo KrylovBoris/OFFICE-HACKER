@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Diagnostics;
+using GlobalMechanics;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace NPC
+namespace NPC.Conversations
 {
     public class WaitingZone : MonoBehaviour, IWaitingZone
     {

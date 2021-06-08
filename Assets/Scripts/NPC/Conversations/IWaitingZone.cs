@@ -1,7 +1,4 @@
-using Agent;
-using UnityEngine;
-
-namespace NPC
+namespace NPC.Conversations
 {
     public interface IWaitingZone
     {

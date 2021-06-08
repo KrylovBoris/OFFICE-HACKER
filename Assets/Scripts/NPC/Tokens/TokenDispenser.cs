@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Agent;
+using NPC.Conversations;
 using UnityEngine;
 
-namespace NPC
+namespace NPC.Tokens
 {
     [RequireComponent(typeof(IWaitingZone))]
     public abstract class TokenDispenser : MonoBehaviour

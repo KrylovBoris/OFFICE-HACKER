@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace KnowledgeContainer
+namespace KnowledgeSystem
 {
     public class State : IEquatable<State>
     {

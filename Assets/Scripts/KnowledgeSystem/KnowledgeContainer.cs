@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using System.Text;
 
-namespace KnowledgeContainer
+namespace KnowledgeSystem
 {
     public class KnowledgeContainer
     {

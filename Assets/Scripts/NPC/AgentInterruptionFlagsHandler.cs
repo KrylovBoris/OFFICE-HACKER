@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Collections.Viewable;
 using UnityEngine.Assertions;
 
-namespace Agent
+namespace NPC
 {
     public enum InterruptionFlag
     {

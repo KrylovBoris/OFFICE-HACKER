@@ -1,7 +1,6 @@
-using Agent;
 using UnityEngine;
 
-namespace NPC
+namespace NPC.Tokens
 {
     public class ArchiveTokenDispenser : TokenDispenser
     {

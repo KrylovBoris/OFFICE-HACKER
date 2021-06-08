@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
-using Agent;
 using GlobalMechanics;
 using JetBrains.Collections.Viewable;
 using JetBrains.Lifetimes;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace NPC
+namespace NPC.Conversations
 {
     public class Conversation : ISightController
     {
@@ -103,7 +102,7 @@ namespace NPC
         {
             var speakerHead = GetSpeaker().Head;
             Vector3 target = speakerHead.position;
-            if (GetSpeaker() == forAgent.Head)
+            if (speakerHead == forAgent.Head)
             {
                 target = target + speakerHead.forward;
             }

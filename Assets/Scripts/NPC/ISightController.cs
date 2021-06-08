@@ -1,7 +1,9 @@
 using UnityEngine;
-using NPC;
 
-public interface ISightController
+namespace NPC
 {
-    Vector3 GetSightTarget(BaseAgent forAgent);
+    public interface ISightController
+    {
+        Vector3 GetSightTarget(BaseAgent forAgent);
+    }
 }

@@ -2,34 +2,37 @@
 using UnityEngine;
 using Directory = FileSystem.Directory;
 
-[CreateAssetMenu(fileName = "Profile", menuName = "ScriptableObjects/Profile", order = 3)]
-public class Profile : ScriptableObject
+namespace GlobalMechanics.ScriptableObjects
 {
-    public string personName;
-    public string logInID;
-    public string password;
-    public HardDrive workspaceConfig;
-    
-    private Directory _workSpace;
-    private EmailBox _emailbox;
-
-    public void ChangePassword(string newPassword)
+    [CreateAssetMenu(fileName = "Profile", menuName = "ScriptableObjects/Profile", order = 3)]
+    public class Profile : ScriptableObject
     {
-        password = newPassword;
-    }
+        public string personName;
+        public string logInID;
+        public string password;
+        public HardDrive workspaceConfig;
     
-    public Directory WorkSpace => _workSpace ??= workspaceConfig.Catalogue;
+        private Directory _workSpace;
+        private EmailBox _emailbox;
 
-    public EmailBox EmailBox
-    {
-        get
+        public void ChangePassword(string newPassword)
         {
-            if (_emailbox == null)
-            {
-                GameManager.gm.Commutator.EstablishConnection(logInID, out _emailbox);
-            }
+            password = newPassword;
+        }
+    
+        public Directory WorkSpace => _workSpace ??= workspaceConfig.Catalogue;
 
-            return _emailbox;
+        public EmailBox EmailBox
+        {
+            get
+            {
+                if (_emailbox == null)
+                {
+                    GameManager.gm.Commutator.EstablishConnection(logInID, out _emailbox);
+                }
+
+                return _emailbox;
+            }
         }
     }
 }
