@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Agent;
 using GlobalMechanics;
 using HierarchicalTaskNetwork;
 using JetBrains.Collections.Viewable;
+using NPC.Tokens;
 using Random = UnityEngine.Random;
 
 namespace NPC
