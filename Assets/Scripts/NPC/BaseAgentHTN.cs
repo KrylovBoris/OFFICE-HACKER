@@ -4,6 +4,7 @@ using GlobalMechanics;
 using HierarchicalTaskNetwork;
 using JetBrains.Collections.Viewable;
 using NPC.Tokens;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace NPC
