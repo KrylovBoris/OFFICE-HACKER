@@ -1,6 +1,5 @@
 ﻿using GlobalMechanics;
 using UnityEngine;
-using UnityStandardAssets.CrossPlatformInput;
 
 namespace Player
 {
@@ -35,33 +34,33 @@ namespace Player
         {
             if (!_controlsLocked)
             {
-                _inputDirection = new Vector3(CrossPlatformInputManager.GetAxisRaw("Horizontal"), 0,
-                    CrossPlatformInputManager.GetAxisRaw("Vertical"));
-                if (CrossPlatformInputManager.GetButtonDown("Sprint"))
+                _inputDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0,
+                    Input.GetAxisRaw("Vertical"));
+                if (Input.GetButtonDown("Sprint"))
                 {
                     _movementScript.IsSprinting = true;
                 }
 
-                if (CrossPlatformInputManager.GetButtonUp("Sprint"))
+                if (Input.GetButtonUp("Sprint"))
                 {
                     _movementScript.IsSprinting = false;
                 }
 
                 if (!GameManager.gm.IsPaused)
-                    _cameraScript.RotateCamera(new Vector2(CrossPlatformInputManager.GetAxisRaw("Mouse X"),
-                        CrossPlatformInputManager.GetAxisRaw("Mouse Y")));
+                    _cameraScript.RotateCamera(new Vector2(Input.GetAxisRaw("Mouse X"),
+                        Input.GetAxisRaw("Mouse Y")));
                 _movementScript.MoveInDirection(_inputDirection);
 
-                if (CrossPlatformInputManager.GetButton("PickUp")) _pickUpStartTime += Time.deltaTime;
+                if (Input.GetButton("PickUp")) _pickUpStartTime += Time.deltaTime;
 
                 if (_pickUpStartTime > pickUpLat) _interactor.PickUpObject();
 
-                if (CrossPlatformInputManager.GetButtonUp("PickUp")) _pickUpStartTime = 0;
+                if (Input.GetButtonUp("PickUp")) _pickUpStartTime = 0;
 
-                if (CrossPlatformInputManager.GetButtonDown("PickUp") && _pickUpSystem.IsCarryingSmomething)
+                if (Input.GetButtonDown("PickUp") && _pickUpSystem.IsCarryingSmomething)
                     _pickUpSystem.Drop();
 
-                if (CrossPlatformInputManager.GetButtonDown("Action"))
+                if (Input.GetButtonDown("Action"))
                 {
                     if (_passwordPeek.CanPeek)
                     {
@@ -69,19 +68,19 @@ namespace Player
                     }
                 }
 
-                if (CrossPlatformInputManager.GetButtonUp("Action"))
+                if (Input.GetButtonUp("Action"))
                 {
                     _passwordPeek.DeactivatePeeking();
                 }
 
-                if (CrossPlatformInputManager.GetButtonDown("Interact"))
+                if (Input.GetButtonDown("Interact"))
                 {
                     _interactor.InteractWithObject();
                 }
             }
 
 
-            if (CrossPlatformInputManager.GetButtonDown("Smartphone"))
+            if (Input.GetButtonDown("Smartphone"))
             {
                 if (GameManager.gm.IsLookingAtSmartPhone)
                 {
@@ -93,7 +92,7 @@ namespace Player
                 }
             }
 
-            if (CrossPlatformInputManager.GetButtonDown("Cancel")) GameManager.gm.Escape();
+            if (Input.GetButtonDown("Cancel")) GameManager.gm.Escape();
 
 
         }
