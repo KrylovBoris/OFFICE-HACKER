@@ -1,4 +1,8 @@
-﻿using System;
+﻿// MIT License
+// Copyright (c) 2020 obrda
+// License information: https://github.com/KrylovBoris/OFFICE-HACKER/blob/main/LICENSE
+
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
