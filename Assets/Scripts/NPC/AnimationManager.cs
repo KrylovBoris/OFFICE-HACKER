@@ -1,4 +1,8 @@
-﻿using JetBrains.Collections.Viewable;
+﻿// MIT License
+// Copyright (c) 2020 KrylovBoris
+// License information: https://github.com/KrylovBoris/OFFICE-HACKER/blob/main/LICENSE
+
+using JetBrains.Collections.Viewable;
 using NPC.Tokens;
 using UnityEngine;
 using Random = UnityEngine.Random;

@@ -1,4 +1,8 @@
-﻿using NPC.Tokens;
+﻿// MIT License
+// Copyright (c) 2020 KrylovBoris
+// License information: https://github.com/KrylovBoris/OFFICE-HACKER/blob/main/LICENSE
+
+using NPC.Tokens;
 using UnityEngine;
 
 namespace NPC

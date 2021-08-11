@@ -1,4 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿// MIT License
+// Copyright (c) 2020 KrylovBoris
+// License information: https://github.com/KrylovBoris/OFFICE-HACKER/blob/main/LICENSE
+
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Interactions
