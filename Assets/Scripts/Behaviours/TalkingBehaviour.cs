@@ -1,5 +1,8 @@
 using NPC;
 using UnityEngine;
+// MIT License
+// Copyright (c) 2020 KrylovBoris
+// License information: https://github.com/KrylovBoris/OFFICE-HACKER/blob/main/LICENSE
 
 namespace Behaviours
 {

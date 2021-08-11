@@ -1,4 +1,8 @@
-﻿using System.Linq;
+﻿// MIT License
+// Copyright (c) 2020 KrylovBoris
+// License information: https://github.com/KrylovBoris/OFFICE-HACKER/blob/main/LICENSE
+
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
