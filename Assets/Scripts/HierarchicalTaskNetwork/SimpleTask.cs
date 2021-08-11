@@ -1,3 +1,7 @@
+// MIT License
+// Copyright (c) 2020 KrylovBoris
+// License information: https://github.com/KrylovBoris/Hierarchical-Task-Network-planner-for-Unity/blob/master/LICENSE
+
 using System.Collections;
 using System.Threading.Tasks;
 using JetBrains.Lifetimes;
